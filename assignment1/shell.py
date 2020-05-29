@@ -10,10 +10,12 @@ def path_cutter(path):
 
 def process(cmd):
     def exit():
-        raise Exception
+        raise StopIteration
 
     def cd():
-        os.chdir(cmd.split(' ')[1])
+        directory = cmd.split(' ')
+        if (len(directory) > 1): os.chdir(directory[1])
+        else: os.chdir(os.path.expanduser('~'))
 
     def command(cmd):
         os.system(cmd)
@@ -37,6 +39,6 @@ while True:
         print("^D")
         print(EXIT_MESSAGE)
         break
-    except Exception:
+    except StopIteration:
         print(EXIT_MESSAGE)
         break
