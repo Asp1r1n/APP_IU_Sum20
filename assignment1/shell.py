@@ -2,11 +2,13 @@ import sys
 import os
 
 EXIT_MESSAGE = 'Goodbye!'
+ERR_LOG_FILE = open(".\\myshell.stderr", "a")
 
 def path_cutter(path):
     path_split = path.split('/')
     cutted_path = '/' + '/'.join(x[0] if x[0] != '.' else x[0:2] for x in path_split[1:])
     return cutted_path
+
 
 def process(cmd):
     def exit():
@@ -14,20 +16,25 @@ def process(cmd):
 
     def cd():
         directory = cmd.split(' ')
-        if (len(directory) > 1): os.chdir(directory[1])
-        else: os.chdir(os.path.expanduser('~'))
+        if len(directory) > 1:
+            os.chdir(directory[1])
+        else:
+            os.chdir(os.path.expanduser('~'))
 
     def command(cmd):
         os.system(cmd)
 
+    if cmd == 'exit()':
+        exit()
+    elif cmd.startswith('cd'):
+        cd()
+    else:
+        command(cmd)
 
-    if (cmd == 'exit()'): exit()
-    elif (cmd.startswith('cd')): cd()
-    else: command(cmd)
 
-def log():
-    #TODO
-    return
+def log(exception):
+    ERR_LOG_FILE.write(str(exception) + "\n")
+
 
 
 while True:
@@ -42,3 +49,8 @@ while True:
     except StopIteration:
         print(EXIT_MESSAGE)
         break
+    except Exception as e:
+        log(e)
+
+
+ERR_LOG_FILE.close()
