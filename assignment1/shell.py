@@ -119,7 +119,7 @@ def init():
 
         global OUT_LOG_FILE
         OUT_LOG_FILE = open(current_outlog_file, "a")
-
+    
     create_log_file()
     sys_info()
     read()
@@ -128,9 +128,23 @@ def end():
     if not ERR_LOG_FILE.closed: ERR_LOG_FILE.close()
     if not OUT_LOG_FILE.closed: OUT_LOG_FILE.close()
 
+# TODO - terminal like input (terminal keymanipulations in subshell)
+def readch():
+    import tty, sys, termios
+
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
+
+
 def read():
     input_promt = Colors.color('L_Shell', Colors.light_green) + Colors.color(' [{0}]: ', Colors.light_blue)
-    
+
     while True:
         current_path =  path_cutter(os.getcwd())
         try:
@@ -149,11 +163,11 @@ def read():
             break
         except Exception as e:
             log(e)
+        finally:
+            end()
 
-    end()
 
 def start():
-    init()
-    
+    init()    
 
 start()
