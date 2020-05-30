@@ -16,6 +16,17 @@ current_errlog_file = ''
 ERR_LOG_FILE = ''
 OUT_LOG_FILE = ''
 
+
+class Colors:
+    light_green = '\033[92m'
+    light_blue = '\033[94m'
+    remove = '\033[0m'
+    bold = '\033[1m'
+
+    @staticmethod
+    def color(str, color):
+        return color + Colors.bold + str + Colors.remove
+
 def path_cutter(path):
     path_split = path.split('/')
     cutted_path = '/' + '/'.join(x[0] if x[0] != '.' else x[0:2] for x in path_split[1:])
@@ -118,10 +129,12 @@ def end():
     if not OUT_LOG_FILE.closed: OUT_LOG_FILE.close()
 
 def read():
+    input_promt = Colors.color('L_Shell', Colors.light_green) + Colors.color(' [{0}]: ', Colors.light_blue)
+    
     while True:
         current_path =  path_cutter(os.getcwd())
         try:
-            cmd = input('L_Shell [{0}]: '.format(current_path))
+            cmd = input(input_promt.format(current_path))
             process(cmd)
         except EOFError:
             print("^D")
@@ -135,10 +148,9 @@ def read():
             print(EXIT_MESSAGE)
             break
         except Exception as e:
-            log(e, ERR_LOG_FILE)
+            log(e)
 
     end()
-
 
 def start():
     init()
