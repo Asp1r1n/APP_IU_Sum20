@@ -16,7 +16,10 @@ current_errlog_file = ''
 ERR_LOG_FILE = ''
 OUT_LOG_FILE = ''
 
+running_platform = ''
 
+
+# colors support for posix shells
 class Colors:
     light_green = '\033[92m'
     light_blue = '\033[94m'
@@ -52,6 +55,8 @@ def process(cmd):
             datetime = dt.now()
 
             lines_out = 0
+
+            # read output from executed  or running subprocess
             while True:
                 try:
                     output = out.readline()
@@ -65,7 +70,7 @@ def process(cmd):
                             print(output, end='')
                             lines_out += 1
                         break
-                except KeyboardInterrupt:
+                except KeyboardInterrupt: # interrupt for long-running subprocess (tail, ping, etc...)
                     print()
                     break
 
@@ -78,6 +83,7 @@ def process(cmd):
     elif (cmd.startswith('cd')): cd()
     else: command(cmd)
 
+# log with out path
 def log(str, where = sys.stdout):
     if not (where  == sys.stdout): print(str, file = where, flush = True)
     else: print(str)
@@ -92,9 +98,15 @@ def str_log(process, timestamp, stdout_count = 0):
     return log_string
 
 def sys_info():
-    print('Python shell run platform: ' + platform.system() + ', Version: ' + str(platform.linux_distribution()) + ', Python ' + platform.python_version())
+    global running_platform
+    running_platform = platform.system()
 
+    sys_info_str = 'Python shell rub platform: {0}, Version: {1}, Python {2}'
 
+    if running_platform == 'Linux': print(sys_info_str.format(running_platform, platform.linux_distribution(), platform.python_version()))
+    else: print(sys_info_str.format(running_platform, platform.win32_ver(), platform.python_version()))
+
+# shell init configuration
 def init():
     def create_log_file():
         if not (os.path.exists(LOGS_DIRECTORY)):
@@ -128,7 +140,7 @@ def end():
     if not ERR_LOG_FILE.closed: ERR_LOG_FILE.close()
     if not OUT_LOG_FILE.closed: OUT_LOG_FILE.close()
 
-# TODO - terminal like input (terminal keymanipulations in subshell)
+# TODO - terminal like input (terminal key manipulations in subshell)
 def readch():
     import tty, sys, termios
 
@@ -141,17 +153,19 @@ def readch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return ch
 
-
+# input read method (simple str input)
 def read():
-    input_promt = Colors.color('L_Shell', Colors.light_green) + Colors.color(' [{0}]: ', Colors.light_blue)
+    linux_prompt = '{1} ' + Colors.color('L_Shell', Colors.light_green) + Colors.color(' [{0}] # ', Colors.light_blue)
+    win_prompt = '{1} W_Shell [{0}] # '
+    input_promt = linux_prompt if running_platform == 'Linux' else win_prompt
 
     while True:
         current_path =  path_cutter(os.getcwd())
         try:
-            cmd = input(input_promt.format(current_path))
+            cmd = input(input_promt.format(current_path, dt.now().strftime('%H:%M:%S')))
             process(cmd)
         except EOFError:
-            print("^D")
+            if running_platform == 'Linux': print("^D") 
             print(EXIT_MESSAGE)
             break
         except KeyboardInterrupt:
@@ -162,9 +176,9 @@ def read():
             print(EXIT_MESSAGE)
             break
         except Exception as e:
-            log(e)
-        finally:
-            end()
+            log(e, ERR_LOG_FILE)
+    
+    end()
 
 
 def start():
