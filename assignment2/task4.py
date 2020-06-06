@@ -8,9 +8,9 @@ import py_compile
 flags = ['-py', '-pyc', '-s']
 actions = ['compile', 'print']
 
+current_action = ''
 current_flag = ''
-current_args = []
-process_queue = ''
+process_queue = {}
 
 bytecode_path = os.path.dirname(__file__) + '/dis'
 
@@ -18,43 +18,110 @@ exit_message = 'usage: ' + os.path.basename(__file__) + ' ' + str(flags) + ' arg
 
 def run():
     try:
-        check_args()
-        disasemble(current_flag)
+        parse_args()
+        process()
     except SystemExit:
         print(exit_message)
 
-def check_args():
-    if len(sys.argv) < 3:
+def process():
+    for key,values in process_queue.items():
+        if current_action == 'compile': cmpl(key, values)
+        elif current_action == 'print': disasemble(key, values)
+
+
+def parse_args():
+    if len(sys.argv) < 4:
         raise SystemExit
 
-    if sys.argv[1] not in flags:
+    if sys.argv[1] not in actions:
         raise SystemExit
 
-    global current_flag
-    current_flag = sys.argv[1]
+    if sys.argv[2] not in flags:
+        raise SystemExit
 
-    global current_args
-    current_args = sys.argv[2:]
+    global current_action
+    current_action = sys.argv[1]
 
-    if current_flag == '-py' or current_flag == '-pyc':
-        for arg in current_args:
-            if not os.path.exists(arg):
-                raise SystemExit
+    flags_indx = []
+    current_index = -1
+
+    for indx,arg in enumerate(sys.argv[2:]):
+        if arg.startswith('-'):
+            flags_indx.append(indx + 2)
+            current_index += 1
+
+            process_queue.update([(arg, [])])
+
+            if(current_index >= 1):
+                if ((flags_indx[current_index] - flags_indx[current_index - 1]) < 2):
+                    raise SystemExit
+        else:
+            arg_p = sys.argv[flags_indx[current_index]]
+            if arg_p == '-py':
+                if not os.path.exists(arg):
+                    raise SystemExit
+
+                if not os.path.isfile(arg):
+                    raise SystemExit
+                
+                if not arg.endswith('.py'):
+                    raise SystemExit
+                
+                process_queue[arg_p].append(arg)
+            
+            elif arg_p == '-pyc':
+
+                if not os.path.exists(arg):
+                    raise SystemExit
+
+                if not os.path.isfile(arg):
+                    raise SystemExit
+                
+                if not arg.endswith('.pyc'):
+                    raise SystemExit
+                
+                process_queue[arg_p].append(arg)
+
+            else:
+
+                if os.path.exists(arg):
+                    raise SystemExit
+
+                process_queue[arg_p].append(arg)
+    
+    if current_action == 'compile' and '-pyc' in process_queue.keys():
+        raise SystemExit
+    
     
 
 def check_directory():
     if not os.path.exists(bytecode_path):
         os.mkdir(bytecode_path)
 
-def disasemble(act):
+def cmpl(flag, args):
+    if flag == '-py': compile_py(args)
+    if flag == '-s': compile_s(args)
+    return
+
+def compile_py(current_args):
+    for arg in current_args:
+        py_compile.compile(arg, cfile= compile_file_name(arg))
+
+def compile_s(current_args):
+        for arg in current_args:
+            obj = compile(arg,'_',mode='exec')
+            marshal.dump(obj, open(compile_file_name(), 'ab+'))
+
+
+def disasemble(flag, current_args):
     check_directory()
 
-    if act == '-py': dis_py()
-    elif act == '-pyc': dis_pyc()
-    elif act == '-s': dis_s()
+    if flag == '-py': dis_py(current_args)
+    elif flag == '-pyc': dis_pyc(current_args)
+    elif flag == '-s': dis_s(current_args)
 
 
-def dis_py():
+def dis_py(current_args):
     for arg in current_args:
         with open(arg) as src:
             source = src.read()
@@ -66,9 +133,8 @@ def dis_py():
         
         print_dis(file_name, arg)
 
-def dis_pyc():
+def dis_pyc(current_args):
     header_sizes = [
-        (8,  (0, 9, 2)),  # python version 0.9.2 - 8 bytes header 
         (12, (3, 6)), # python version 3.6 - 12 bytes header
         (16, (3, 7)), # python version 3.8 - 16 bytes header
     ]
@@ -76,23 +142,33 @@ def dis_pyc():
 
     for arg in current_args:
         with open(arg, 'rb') as src:
-            src.seek(header_size)
+            if os.path.basename(arg) != 'out.pyc':
+                src.seek(header_size)
             source = marshal.load(src)
-    
+        
         file_name = dis_file_name(arg)
 
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
-        
+            
         print_dis(file_name, arg)
 
-def dis_s():
+def dis_s(current_args):
     for arg in current_args:
         arrow = " ------> "
         h_line = '=' * len(arg) + '=' * len(arrow) + "=" * len("dis") + '\n'
         print('', h_line, arg + arrow + 'dis\n' , h_line, end='')
         dis.dis(arg)
         print('',h_line)
+
+def compile_file_name(arg = 'out'):
+    path = os.path.dirname(__file__) + '/__pycache__' + '/'
+    if arg != 'out':
+        path = path + os.path.basename(arg[:arg.rindex('.')] + '.pyc')
+    else:
+        path = path + 'out.pyc'
+    
+    return path
 
 def dis_file_name(arg):
     return bytecode_path + '/' + os.path.basename(arg[:arg.rindex('.')] + '.dis')
