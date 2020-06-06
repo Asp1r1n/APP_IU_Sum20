@@ -1,6 +1,7 @@
 import subprocess
 import sys
-import timeit
+import os
+import time
 
 COLUMN_NAMES = ["PROGRAM", "RANK", "TIME ELAPSED"]
 
@@ -8,19 +9,19 @@ COLUMN_NAMES = ["PROGRAM", "RANK", "TIME ELAPSED"]
 def compile_all():
     for path in sys.argv[1:]:
         try:
-            start = timeit.timeit()
-            #subprocess.popen(path)
-            exec(open(path).read(), {})
-            end = timeit.timeit()
+            start = time.process_time()
+            completed = subprocess.check_call(['python3', path], stdout=subprocess.DEVNULL)
+            end = time.process_time()
             dif = end - start
             yield path, dif
-        except Exception:
+        except Exception as e:
+            print(e)
             yield path, sys.maxsize
 
 
 def rank(run_data):
-    run_data.sort(key=lambda tup: tup[1])
-    r = 1
+    run_data.sort(key = lambda tup: tup[1])
+    r = 0
     prev_time = 0
     for item in run_data:
         if item[1] < sys.maxsize:
@@ -33,10 +34,15 @@ def rank(run_data):
 
 
 def print_table(column_names, data):
-    row_format = "{:>30}" * len(column_names)
-    print(row_format.format(*column_names))
+    h_line = "=" * 30  + "=" * 30 + "=" * 3
+    head_format = "{0:<30}|{1:<15}|{2:<15}|"
+    row_format = "{0:>30}|{1:>15}|{2:>15f}|"
+    print(h_line)
+    print(head_format.format(*column_names))
+    print(h_line)
     for row in data:
         print(row_format.format(*row))
+    print(h_line)
 
 
 ranked_statistics = list(compile_all())
