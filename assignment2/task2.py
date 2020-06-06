@@ -8,7 +8,7 @@ actions = ['-py']
 current_action = ''
 current_args = []
 
-bytecode_path = 'dis'
+bytecode_path = os.path.dirname(__file__) + '/dis'
 
 exit_message = 'usage: ' + os.path.basename(__file__) + ' ' + str(actions) + ' args'
 
@@ -49,14 +49,14 @@ def disasemble():
         with open(arg) as src:
             source = src.read()
         
-        file_name = bytecode_path + '/' + arg.replace('.py', '.pyc')
+        file_name = bytecode_path + '/' + os.path.basename(arg.replace('.py', '.dis'))
 
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
         
         with open(file_name, 'r') as file:
-            h_line = '=' * len(arg) + '=' * 9 + "=" * len(file_name) + '\n'
-            print('',h_line, arg + " ------> " + file_name + "\n", h_line, *(x for x in file.readlines()), h_line)
+            h_line = '=' * len(arg) + '=' * 9 + "=" * len(os.path.basename(file_name)) + '\n'
+            print('',h_line, arg + " ------> " + os.path.basename(file_name) + "\n", h_line, *(x for x in file.readlines()), h_line)
 
 def main():
     run()
