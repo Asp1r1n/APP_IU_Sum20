@@ -9,7 +9,6 @@ def compile_all():
     for path in sys.argv[1:]:
         try:
             start = timeit.timeit()
-            #subprocess.popen(path)
             exec(open(path).read(), {})
             end = timeit.timeit()
             dif = end - start
@@ -19,8 +18,8 @@ def compile_all():
 
 
 def rank(run_data):
-    run_data.sort(key=lambda tup: tup[1])
-    r = 1
+    run_data.sort(key=lambda tup: tup[1], reverse=True)
+    r = 0
     prev_time = 0
     for item in run_data:
         if item[1] < sys.maxsize:
@@ -39,6 +38,10 @@ def print_table(column_names, data):
         print(row_format.format(*row))
 
 
-ranked_statistics = list(compile_all())
-ranked_statistics = rank(ranked_statistics)
-print_table(COLUMN_NAMES, ranked_statistics)
+if len(sys.argv[1:]) != 0:
+    ranked_statistics = list(compile_all())
+    ranked_statistics = rank(ranked_statistics)
+    print_table(COLUMN_NAMES, ranked_statistics)
+else:
+    print("usage: compare.py [files]")
+    print("This program...")
