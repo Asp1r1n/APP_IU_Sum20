@@ -37,12 +37,7 @@ def print_table(column_names, data):
     h_line = "=" * 60 + "=" * 3
     head_format = "{0:<30}|{1:<15}|{2:<15}|"
     row_format = "{0:>30}|{1:>15}|{2:>15f}|"
-    print(h_line)
-    print(head_format.format(*column_names))
-    print(h_line)
-    for row in data:
-        print(row_format.format(*row))
-    print(h_line)
+    print(h_line,head_format.format(*column_names), h_line, *(row_format.format(*x) for x in data), h_line, sep='\n')
 
 
 if len(sys.argv[1:]) != 0:
