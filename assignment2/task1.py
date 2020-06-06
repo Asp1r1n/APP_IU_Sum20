@@ -20,7 +20,7 @@ def compile_all():
 
 
 def rank(run_data):
-    run_data.sort(key = lambda tup: tup[1])
+    run_data.sort(key=lambda tup: tup[1])
     r = 0
     prev_time = 0
     for item in run_data:
@@ -34,7 +34,7 @@ def rank(run_data):
 
 
 def print_table(column_names, data):
-    h_line = "=" * 30  + "=" * 30 + "=" * 3
+    h_line = "=" * 60 + "=" * 3
     head_format = "{0:<30}|{1:<15}|{2:<15}|"
     row_format = "{0:>30}|{1:>15}|{2:>15f}|"
     print(h_line)
@@ -45,6 +45,10 @@ def print_table(column_names, data):
     print(h_line)
 
 
-ranked_statistics = list(compile_all())
-ranked_statistics = rank(ranked_statistics)
-print_table(COLUMN_NAMES, ranked_statistics)
+if len(sys.argv[1:]) != 0:
+    ranked_statistics = list(compile_all())
+    ranked_statistics = rank(ranked_statistics)
+    print_table(COLUMN_NAMES, ranked_statistics)
+else:
+    print("usage: compare.py [files]")
+    print("This program...")
