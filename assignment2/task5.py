@@ -31,6 +31,10 @@ def process():
         elif current_action == 'print': disasemble(key, values, True)
         elif current_action == 'compare': cmpr(key, values)
 
+    if current_action == 'compare':
+        normalize(dic)
+        print_comparsion_table(dic)
+
 
 def parse_args():
     if len(sys.argv) < 4:
@@ -103,7 +107,16 @@ def check_directory():
 
 def cmpr(flag, args):
     build_compare_dict(flag, args)
-    print(dic)
+
+def normalize(dic_n):
+    u_set = set()
+    for value in dic_n.values():
+        u_set.update(list(value.keys()))
+
+    for value in dic_n.values():
+        for set_v in u_set:
+            if set_v not in value.keys():
+                value.update([(set_v, 0)])
 
 def build_compare_dict(flag, args):
     if flag != '-s': disasemble(flag, args)
