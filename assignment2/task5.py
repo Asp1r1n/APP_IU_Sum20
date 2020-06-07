@@ -4,13 +4,15 @@ import sys
 import dis
 import marshal
 import py_compile
+import re
 
 flags = ['-py', '-pyc', '-s']
-actions = ['compile', 'print']
+actions = ['compile', 'print', 'compare']
 
 current_action = ''
 current_flag = ''
 process_queue = {}
+dic = {}
 
 bytecode_path = os.path.dirname(__file__) + '/dis'
 
@@ -26,7 +28,8 @@ def run():
 def process():
     for key,values in process_queue.items():
         if current_action == 'compile': cmpl(key, values)
-        elif current_action == 'print': disasemble(key, values)
+        elif current_action == 'print': disasemble(key, values, True)
+        elif current_action == 'compare': cmpr(key, values)
 
 
 def parse_args():
@@ -98,6 +101,47 @@ def check_directory():
     if not os.path.exists(bytecode_path):
         os.mkdir(bytecode_path)
 
+def cmpr(flag, args):
+    build_compare_dict(flag, args)
+    print(dic)
+
+def build_compare_dict(flag, args):
+    if flag != '-s': disasemble(flag, args)
+    else: 
+        cmpl(flag, args)
+        disasemble(flag, 'out.pyc')
+
+
+    for arg in args:
+        file_name = dis_file_name(arg)
+        parse_dis_file(file_name, arg)
+
+    
+def parse_dis_file(file_name, source_file):
+
+    source_file = os.path.basename(source_file)
+
+    global dic 
+    if source_file not in dic.keys(): 
+        dic.update([(source_file, dict())])
+    else: 
+        return
+            
+    with open(file_name, "r") as file:
+        for line in file.readlines():
+            line = line.strip()
+
+            if line == '': continue
+
+            
+            opcode = re.findall('[A-Z]+_[A-Z]+', line) [0]  
+            source_dic = dic[source_file]
+
+            if opcode not in source_dic.keys():
+                source_dic.update([(opcode, 1)])
+            else:
+                source_dic.update([(opcode, source_dic[opcode] + 1)])        
+
 def cmpl(flag, args):
     if flag == '-py': compile_py(args)
     if flag == '-s': compile_s(args)
@@ -113,15 +157,15 @@ def compile_s(current_args):
             marshal.dump(obj, open(compile_file_name(), 'ab+'))
 
 
-def disasemble(flag, current_args):
+def disasemble(flag, current_args, print = False):
     check_directory()
 
-    if flag == '-py': dis_py(current_args)
-    elif flag == '-pyc': dis_pyc(current_args)
+    if flag == '-py': dis_py(current_args, print)
+    elif flag == '-pyc': dis_pyc(current_args, print)
     elif flag == '-s': dis_s(current_args)
 
 
-def dis_py(current_args):
+def dis_py(current_args, print):
     for arg in current_args:
         with open(arg) as src:
             source = src.read()
@@ -131,9 +175,9 @@ def dis_py(current_args):
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
         
-        print_dis(file_name, arg)
+        if print: print_dis(file_name, arg)
 
-def dis_pyc(current_args):
+def dis_pyc(current_args, print):
     header_sizes = [
         (12, (3, 6)), # python version 3.6 - 12 bytes header
         (16, (3, 7)), # python version 3.8 - 16 bytes header
@@ -151,7 +195,7 @@ def dis_pyc(current_args):
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
             
-        print_dis(file_name, arg)
+        if print: print_dis(file_name, arg)
 
 def dis_s(current_args):
     for arg in current_args:
