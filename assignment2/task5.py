@@ -179,7 +179,35 @@ def print_dis(file_name, src):
     
     with open(file_name, 'r') as file:
         print('',h_line, src + arrow + os.path.basename(file_name) + "\n", h_line, *(x for x in file.readlines()), h_line)
-    
+
+
+def print_comparsion_table(comparsion_results):
+    opcode_entries = dict()
+
+    for file in comparsion_results:
+        opcodes = comparsion_results[file]
+        for opcode in opcodes:
+            opcode_entries[opcode] = opcodes[opcode]
+
+    opcode_entries = sorted(opcode_entries.keys(), key=lambda key: opcode_entries[key])
+
+    h_line = "=" * 16 * (len(comparsion_results) + 1)
+    head_format = "{0:<15}" + "|{2:>15}" * len(comparsion_results) + "|"
+    row_format = "{0:>15}" + "|{2:>15}" * len(comparsion_results) + "|"
+    column_names = ['INSTRUCTION']
+    column_names.extend(comparsion_results.keys())
+
+    print(row_format)
+
+    print(h_line,
+          head_format.format(*column_names),
+          h_line,
+          *[
+              row_format.format(*(
+                      [k] + list([comparsion_results[f][k] for f in comparsion_results])))
+              for k in opcode_entries],
+          h_line, sep='\n')
+
 def main():
     run()
 
