@@ -246,15 +246,17 @@ def print_comparsion_table(comparsion_results):
         for opcode in opcodes:
             opcode_entries[opcode] = opcodes[opcode]
 
-    opcode_entries = sorted(opcode_entries.keys(), key=lambda key: opcode_entries[key])
+    opcode_entries = sorted(opcode_entries.keys(), key=lambda key: opcode_entries[key], reverse = True)
 
     h_line = "=" * 16 * (len(comparsion_results) + 1)
-    head_format = "{0:<15}" + "|{2:>15}" * len(comparsion_results) + "|"
-    row_format = "{0:>15}" + "|{2:>15}" * len(comparsion_results) + "|"
+    head_format = "{:<15}" + "|{:>15}" * len(comparsion_results) + "|"
+    row_format = "{:>15}" + "|{:>15}" * len(comparsion_results) + "|"
     column_names = ['INSTRUCTION']
     column_names.extend(comparsion_results.keys())
 
-    print(row_format)
+    # print(column_names)
+
+    # print(row_format)
 
     print(h_line,
           head_format.format(*column_names),
