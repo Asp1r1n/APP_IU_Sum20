@@ -244,7 +244,7 @@ def print_comparsion_table(comparsion_results):
     for file in comparsion_results:
         opcodes = comparsion_results[file]
         for opcode in opcodes:
-            opcode_entries[opcode] = opcodes[opcode]
+            opcode_entries[opcode] = max(opcode_entries.get(opcode,0),opcodes[opcode])
 
     opcode_entries = sorted(opcode_entries.keys(), key=lambda key: opcode_entries[key], reverse = True)
 
@@ -253,10 +253,6 @@ def print_comparsion_table(comparsion_results):
     row_format = "{:>15}" + "|{:>15}" * len(comparsion_results) + "|"
     column_names = ['INSTRUCTION']
     column_names.extend(comparsion_results.keys())
-
-    # print(column_names)
-
-    # print(row_format)
 
     print(h_line,
           head_format.format(*column_names),
