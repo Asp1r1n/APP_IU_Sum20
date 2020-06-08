@@ -16,14 +16,30 @@ dic = {}
 
 bytecode_path = os.path.dirname(__file__) + '/dis'
 
-exit_message = 'usage: ' + os.path.basename(__file__) + ' ' + str(flags) + ' args'
+help_str = '''usage: ''' + os.path.basename(__file__) + ''' action [-flag [value]+]*
+
+    compile
+        -py  [filename.py]+  compile file into bytecode and store it as file.pyc 
+        -s   "src"           compile src into bytecode and store it as out.pyc 
+
+    print 
+        -py  [filename.py]+  produce human-readable bytecode from python file 
+        -pyc [filename.pyc]+ produce human-readable bytecode from compiled .pyc file 
+        -s   ["src"]+        produce human-readable bytecode from normal string 
+
+    compare 
+        [-flag [value]+]*    produce bytecode comparison for giving sources
+
+                    
+    example: program compare -py test1.py test2.py -pyc test3.pyc test4.pyc -s "print('Hello')" '''
+                    
 
 def run():
     try:
         parse_args()
         process()
     except SystemExit:
-        print(exit_message)
+        print(help_str)
 
 def process():
     for key,values in process_queue.items():
@@ -122,11 +138,14 @@ def build_compare_dict(flag, args):
     if flag != '-s': disasemble(flag, args)
     else: 
         cmpl(flag, args)
-        disasemble(flag, 'out.pyc')
+        disasemble('-pyc', [compile_file_name()])
 
 
     for arg in args:
-        file_name = dis_file_name(arg)
+        if flag != '-s': 
+            file_name = dis_file_name(arg)
+        else: 
+            file_name = dis_file_name(compile_file_name())
         parse_dis_file(file_name, arg)
 
     
@@ -170,15 +189,15 @@ def compile_s(current_args):
             marshal.dump(obj, open(compile_file_name(), 'ab+'))
 
 
-def disasemble(flag, current_args, print = False):
+def disasemble(flag, current_args, pr = False):
     check_directory()
 
-    if flag == '-py': dis_py(current_args, print)
-    elif flag == '-pyc': dis_pyc(current_args, print)
+    if flag == '-py': dis_py(current_args, pr)
+    elif flag == '-pyc': dis_pyc(current_args, pr)
     elif flag == '-s': dis_s(current_args)
 
 
-def dis_py(current_args, print):
+def dis_py(current_args, pr):
     for arg in current_args:
         with open(arg) as src:
             source = src.read()
@@ -188,9 +207,9 @@ def dis_py(current_args, print):
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
         
-        if print: print_dis(file_name, arg)
+        if pr: print_dis(file_name, arg)
 
-def dis_pyc(current_args, print):
+def dis_pyc(current_args, pr):
     header_sizes = [
         (12, (3, 6)), # python version 3.6 - 12 bytes header
         (16, (3, 7)), # python version 3.8 - 16 bytes header
@@ -208,7 +227,7 @@ def dis_pyc(current_args, print):
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
             
-        if print: print_dis(file_name, arg)
+        if pr: print_dis(file_name, arg)
 
 def dis_s(current_args):
     for arg in current_args:
