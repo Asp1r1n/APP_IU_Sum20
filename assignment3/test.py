@@ -1,6 +1,6 @@
 from decor import reflect
 
-
+@reflect(word = 'with')
 @reflect(word = 'if')
 def fooo(a, b =''):
     """ This function does nothing useful
@@ -17,7 +17,7 @@ def fooo(a, b =''):
     if False == True:
         print("We do american magic hear")
     else:
-        print("And hear we do real work russian work")
+        print("And hear we do real")
 
     print(1)
 

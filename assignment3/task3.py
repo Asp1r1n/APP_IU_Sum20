@@ -21,3 +21,4 @@ def reflect(function):
                         Source = ''.join(inspect.getsourcelines(function)[0][1:]),
                         Out = out.getvalue())
   return wrapper
+  
