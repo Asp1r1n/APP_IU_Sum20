@@ -9,3 +9,6 @@ def reflect(function):
     print("Doc: " + str(function.__doc__))
     lines = inspect.getsource(function)
     print("Source: " + lines)
+
+
+reflect(reflect)
