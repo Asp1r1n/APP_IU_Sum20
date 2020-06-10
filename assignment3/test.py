@@ -3,9 +3,13 @@ import task2
 
 @task2.reflect
 def fooo(a, b =''):
+    """ This function does nothing useful
+        :param bar1: description
+        :param bar2: description
     """
-    This function does nothing useful
-    :param bar1: description
-    :param bar2: description
-    """
+    print(1)
+
+
+if __name__ == "__main__":
+    fooo(12, b = 'hello')
     print(1)

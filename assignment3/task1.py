@@ -1,9 +1,9 @@
 from decor import reflect_print
-from decor import reflect
 
+@reflect_print  
 @reflect_print
-def foo():
-    print('bar')
+def foo(bar,sar):
+    print(bar,sar)
 
 @reflect_print
 def GG():
