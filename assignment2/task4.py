@@ -14,14 +14,26 @@ process_queue = {}
 
 bytecode_path = os.path.dirname(__file__) + '/dis'
 
-exit_message = 'usage: ' + os.path.basename(__file__) + ' ' + str(flags) + ' args'
+
+help_str = '''usage: ''' + os.path.basename(__file__) + ''' action [-flag [value]+]*
+
+    compile
+        -py  [filename.py]+  compile file into bytecode and store it as file.pyc 
+        -s   "src"           compile src into bytecode and store it as out.pyc 
+
+    print 
+        -py  [filename.py]+  produce human-readable bytecode from python file 
+        -pyc [filename.pyc]+ produce human-readable bytecode from compiled .pyc file 
+        -s   ["src"]+        produce human-readable bytecode from normal string 
+
+    example: program print -py test1.py test2.py -pyc test3.pyc test4.pyc -s "print('Hello')" "dic = {}" '''
 
 def run():
     try:
         parse_args()
         process()
     except SystemExit:
-        print(exit_message)
+        print(help_str)
 
 def process():
     for key,values in process_queue.items():

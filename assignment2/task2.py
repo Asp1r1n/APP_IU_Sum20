@@ -10,14 +10,18 @@ current_args = []
 
 bytecode_path = os.path.dirname(__file__) + '/dis'
 
-exit_message = 'usage: ' + os.path.basename(__file__) + ' ' + str(actions) + ' args'
+help_str = '''usage: ''' + os.path.basename(__file__) + ''' -flag [value]+
+
+    -py  [filename.py]+  produce human-readable bytecode from python file 
+
+    example: program -py test1.py test2.py  '''
 
 def run():
     try:
         check_args()
         disasemble()
     except SystemExit:
-        print(exit_message)
+        print(help_str)
 
 def check_args():
     if len(sys.argv) < 3:

@@ -4,29 +4,52 @@ import sys
 import dis
 import marshal
 import py_compile
+import re
 
 flags = ['-py', '-pyc', '-s']
-actions = ['compile', 'print']
+actions = ['compile', 'print', 'compare']
 
 current_action = ''
 current_flag = ''
 process_queue = {}
+dic = {}
 
 bytecode_path = os.path.dirname(__file__) + '/dis'
 
-exit_message = 'usage: ' + os.path.basename(__file__) + ' ' + str(flags) + ' args'
+help_str = '''usage: ''' + os.path.basename(__file__) + ''' action [-flag [value]+]*
+
+    compile
+        -py  [filename.py]+  compile file into bytecode and store it as file.pyc 
+        -s   "src"           compile src into bytecode and store it as out.pyc 
+
+    print 
+        -py  [filename.py]+  produce human-readable bytecode from python file 
+        -pyc [filename.pyc]+ produce human-readable bytecode from compiled .pyc file 
+        -s   ["src"]+        produce human-readable bytecode from normal string 
+
+    compare 
+        [-flag [value]+]*    produce bytecode comparison for giving sources
+
+                    
+    example: program compare -py test1.py test2.py -pyc test3.pyc test4.pyc -s "print('Hello')" '''
+                    
 
 def run():
     try:
         parse_args()
         process()
     except SystemExit:
-        print(exit_message)
+        print(help_str)
 
 def process():
     for key,values in process_queue.items():
         if current_action == 'compile': cmpl(key, values)
-        elif current_action == 'print': disasemble(key, values)
+        elif current_action == 'print': disasemble(key, values, True)
+        elif current_action == 'compare': cmpr(key, values)
+
+    if current_action == 'compare':
+        normalize(dic)
+        print_comparsion_table(dic)
 
 
 def parse_args():
@@ -98,6 +121,59 @@ def check_directory():
     if not os.path.exists(bytecode_path):
         os.mkdir(bytecode_path)
 
+def cmpr(flag, args):
+    build_compare_dict(flag, args)
+
+def normalize(dic_n):
+    u_set = set()
+    for value in dic_n.values():
+        u_set.update(list(value.keys()))
+
+    for value in dic_n.values():
+        for set_v in u_set:
+            if set_v not in value.keys():
+                value.update([(set_v, 0)])
+
+def build_compare_dict(flag, args):
+    if flag != '-s': disasemble(flag, args)
+    else: 
+        cmpl(flag, args)
+        disasemble('-pyc', [compile_file_name()])
+
+
+    for arg in args:
+        if flag != '-s': 
+            file_name = dis_file_name(arg)
+        else: 
+            file_name = dis_file_name(compile_file_name())
+        parse_dis_file(file_name, arg)
+
+    
+def parse_dis_file(file_name, source_file):
+
+    source_file = os.path.basename(source_file)
+
+    global dic 
+    if source_file not in dic.keys(): 
+        dic.update([(source_file, dict())])
+    else: 
+        return
+            
+    with open(file_name, "r") as file:
+        for line in file.readlines():
+            line = line.strip()
+
+            if line == '': continue
+
+            
+            opcode = re.findall('[A-Z]+_[A-Z]+', line) [0]  
+            source_dic = dic[source_file]
+
+            if opcode not in source_dic.keys():
+                source_dic.update([(opcode, 1)])
+            else:
+                source_dic.update([(opcode, source_dic[opcode] + 1)])        
+
 def cmpl(flag, args):
     if flag == '-py': compile_py(args)
     if flag == '-s': compile_s(args)
@@ -113,15 +189,15 @@ def compile_s(current_args):
             marshal.dump(obj, open(compile_file_name(), 'ab+'))
 
 
-def disasemble(flag, current_args):
+def disasemble(flag, current_args, pr = False):
     check_directory()
 
-    if flag == '-py': dis_py(current_args)
-    elif flag == '-pyc': dis_pyc(current_args)
+    if flag == '-py': dis_py(current_args, pr)
+    elif flag == '-pyc': dis_pyc(current_args, pr)
     elif flag == '-s': dis_s(current_args)
 
 
-def dis_py(current_args):
+def dis_py(current_args, pr):
     for arg in current_args:
         with open(arg) as src:
             source = src.read()
@@ -131,9 +207,9 @@ def dis_py(current_args):
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
         
-        print_dis(file_name, arg)
+        if pr: print_dis(file_name, arg)
 
-def dis_pyc(current_args):
+def dis_pyc(current_args, pr):
     header_sizes = [
         (12, (3, 6)), # python version 3.6 - 12 bytes header
         (16, (3, 7)), # python version 3.8 - 16 bytes header
@@ -151,7 +227,7 @@ def dis_pyc(current_args):
         with open(file_name, 'w') as file:
             dis.dis(source, file = file)
             
-        print_dis(file_name, arg)
+        if pr: print_dis(file_name, arg)
 
 def dis_s(current_args):
     for arg in current_args:
@@ -187,17 +263,15 @@ def print_comparsion_table(comparsion_results):
     for file in comparsion_results:
         opcodes = comparsion_results[file]
         for opcode in opcodes:
-            opcode_entries[opcode] = opcodes[opcode]
+            opcode_entries[opcode] = max(opcode_entries.get(opcode,0),opcodes[opcode])
 
-    opcode_entries = sorted(opcode_entries.keys(), key=lambda key: opcode_entries[key])
+    opcode_entries = sorted(opcode_entries.keys(), key=lambda key: opcode_entries[key], reverse = True)
 
     h_line = "=" * 16 * (len(comparsion_results) + 1)
-    head_format = "{0:<15}" + "|{2:>15}" * len(comparsion_results) + "|"
-    row_format = "{0:>15}" + "|{2:>15}" * len(comparsion_results) + "|"
+    head_format = "{:<15}" + "|{:>15}" * len(comparsion_results) + "|"
+    row_format = "{:>15}" + "|{:>15}" * len(comparsion_results) + "|"
     column_names = ['INSTRUCTION']
     column_names.extend(comparsion_results.keys())
-
-    print(row_format)
 
     print(h_line,
           head_format.format(*column_names),
