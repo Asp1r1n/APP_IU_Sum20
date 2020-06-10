@@ -1,23 +1,40 @@
 import inspect
 import types
+import io
+import re
+from printer import print_reflection
+from contextlib import redirect_stdout
 
-def reflect(func):
+def complexity(lines, word):
+    pattern = re.compile(r'\n *' + word + r'.*:\n')
+    iterator = re.finditer(pattern, lines)
+    count = 0
+    for match in iterator:
+        count += 1
+    return count
 
-    if not isinstance(func, types.FunctionType):
+def reflect(word = 'if'):
+
+  def reflect_decorator(function):
+
+    if not isinstance(function, types.FunctionType):
         raise TypeError
-    
-    def wrapper():
-        print(inspect.getsource(func))
+  
+    def wrapper(*args, **kwargs):
+        
+        out = io.StringIO()
+        with redirect_stdout(out):
+            function(args, kwargs)
+
+        lines = ''.join(inspect.getsourcelines(function)[0][1:])
+
+        print_reflection(Name = function.__name__, 
+                            Type = str(type(function)),
+                            Sign = str(inspect.signature(function)),
+                            Args = ('positional ' + str(args), 'key=worded ' + str(kwargs)),
+                            Doc = str(function.__doc__),
+                            Complexity = complexity(lines, word),
+                            Source = lines,
+                            Out = out.getvalue())
     return wrapper
-
-def reflect_print(func):
-
-    '''Get the source file of func object, find the line of call decorator,
-        print the line of source func wrapped by this decorator '''
-
-    if not isinstance(func, types.FunctionType):
-        raise TypeError
-    
-    def wrapper():
-        print(''.join(inspect.getsourcelines(func)[0][1:]))
-    return wrapper
+  return reflect_decorator

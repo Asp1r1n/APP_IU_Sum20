@@ -2,5 +2,7 @@ import inspect
 
 
 def reflect(function):
-    lines = inspect.getsource(function)
-    print(lines)
+    def wrapper(*args, **kwargs):
+        lines = ''.join(inspect.getsourcelines(function)[0][1:])
+        print(lines)
+    return wrapper

@@ -1,18 +1,12 @@
-from task4 import reflect
+from decor import reflect
 
 
-@reflect
+@reflect(word = 'if')
 def fooo(a, b =''):
     """ This function does nothing useful
         :param bar1: description
         :param bar2: description
     """
-    print(1)
-
-
-if __name__ == "__main__":
-    fooo(12, b = 'hello')
-    print(1)
     if True == True:
         print("Its ok")
     else:
@@ -21,6 +15,13 @@ if __name__ == "__main__":
         print("give me my money")
         
     if False == True:
-        print("We do afro american magic hear")
+        print("We do american magic hear")
     else:
-        print("And hear we do real work")
+        print("And hear we do real work russian work")
+
+    print(1)
+
+
+if __name__ == "__main__":
+    fooo(12, b = 'hello')
+    
