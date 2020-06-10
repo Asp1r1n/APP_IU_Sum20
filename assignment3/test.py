@@ -1,7 +1,7 @@
-import task2
+from task4 import reflect
 
 
-@task2.reflect
+@reflect
 def fooo(a, b =''):
     """
     This function does nothing useful
