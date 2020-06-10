@@ -1,14 +1,8 @@
-from decor import reflect_print
+import inspect
 
-@reflect_print  
-@reflect_print
-def foo(bar,sar):
-    print(bar,sar)
 
-@reflect_print
-def GG():
-    print('GG')
-
-if __name__ == '__main__':
-    foo()
-    GG()
+def reflect(function):
+    def wrapper(*args, **kwargs):
+        lines = ''.join(inspect.getsourcelines(function)[0][1:])
+        print(lines)
+    return wrapper
