@@ -1,7 +1,7 @@
-import task2
+from task4 import reflect
 
 
-@task2.reflect
+@reflect
 def fooo(a, b =''):
     """ This function does nothing useful
         :param bar1: description
@@ -13,3 +13,14 @@ def fooo(a, b =''):
 if __name__ == "__main__":
     fooo(12, b = 'hello')
     print(1)
+    if True == True:
+        print("Its ok")
+    else:
+        print("Ay-ya-ya-ya-Indiaaaaaaa")
+        print("ruppy comes ruppy goes")
+        print("give me my money")
+        
+    if False == True:
+        print("We do afro american magic hear")
+    else:
+        print("And hear we do real work")
