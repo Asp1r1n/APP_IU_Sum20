@@ -33,7 +33,7 @@ def reflect(word = 'if'):
                             Sign = str(inspect.signature(function)),
                             Args = ('positional ' + str(args), 'key=worded ' + str(kwargs)),
                             Doc = str(function.__doc__),
-                            Complexity = complexity(lines, word),
+                            Complexity = str(omplexity(lines, word)),
                             Source = lines,
                             Out = out.getvalue())
     return wrapper

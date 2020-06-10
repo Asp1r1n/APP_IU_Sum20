@@ -5,9 +5,6 @@ sub_str = "{:>10}    {}"
 def print_reflection(*args, **kwargs):
 
     for key,value in kwargs.items():
-        if type(value) is int:
-            print(format_str.format(key, value));
-            print(); continue
 
         if type(value) is str:
             value = value.splitlines()    
