@@ -9,3 +9,14 @@ def fooo(a, b =''):
     :param bar2: description
     """
     print(1)
+    if True == True:
+        print("Its ok")
+    else:
+        print("Ay-ya-ya-ya-Indiaaaaaaa")
+        print("ruppy comes ruppy goes")
+        print("give me my money")
+        
+    if False == True:
+        print("We do afro american magic hear")
+    else:
+        print("And hear we do real work")

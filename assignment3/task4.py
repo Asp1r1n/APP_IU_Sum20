@@ -9,7 +9,7 @@ def reflect(function):
     lines = inspect.getsource(function)
     print("Source: " + lines)
 
-    pattern = re.compile(r'^ *if.*:$')
+    pattern = re.compile(r'\n *if.*:\n')
     iterator = re.finditer(pattern, lines)
     count = 0
     for match in iterator:
