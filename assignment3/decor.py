@@ -6,11 +6,19 @@ from printer import print_reflection
 from contextlib import redirect_stdout
 
 def complexity(lines, word):
-    pattern = re.compile(r'\n *' + word + r'.*:\n')
-    iterator = re.finditer(pattern, lines)
     count = 0
-    for match in iterator:
-        count += 1
+    splited_lines = lines.splitlines()
+    
+    symbols = [')','(',';','"','"', "'", ':', '[',']','{','}']
+    for line in splited_lines:
+        new_line = ''
+        for indx in range(len(line)):
+            if line[indx] in symbols: new_line += ' '
+            else: new_line += line[indx]
+            
+        for token in new_line.split():
+            if token == word:
+                count += 1
     return count
 
 def reflect(word = 'if'):
@@ -33,7 +41,7 @@ def reflect(word = 'if'):
                             Sign = str(inspect.signature(function)),
                             Args = ('positional ' + str(args), 'key=worded ' + str(kwargs)),
                             Doc = str(function.__doc__),
-                            Complexity = str(complexity(lines, word)),
+                            Complx = "{'" + word + "': " + str(complexity(lines, word)) + "}",
                             Source = lines,
                             Out = out.getvalue())
     return wrapper

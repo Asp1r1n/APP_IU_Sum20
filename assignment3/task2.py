@@ -4,6 +4,7 @@ import io
 from printer import print_reflection
 from contextlib import redirect_stdout
 
+
 def reflect(function):
 
   if not isinstance(function, types.FunctionType):
