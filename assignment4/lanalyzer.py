@@ -47,6 +47,7 @@ def tokens(line):
                     tokens.append(list_as_str(c_word))
                     c_word.clear()
                     is_str_lit = False
+                    continue
         elif ch == cmm_ch:
             if c_word != []: 
                 tokens.append(list_as_str(c_word))
