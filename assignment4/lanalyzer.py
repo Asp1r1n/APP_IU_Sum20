@@ -254,6 +254,8 @@ def startswith(line_tokens:list, starts:list):
 
 def is_entity(l_tokens, rec_indx):
 
+    ''' Define is the tokens form the entity'''
+
     for indx,token in enumerate(l_tokens):
         if token == 'def':
             return True
@@ -263,11 +265,17 @@ def is_entity(l_tokens, rec_indx):
                     return True
 
 def is_valid_var_ch(ch):
+
+    ''' Define is the char within the valid variable name'''
+
     return (ord(ch) >= 65 and ord(ch) <= 90) or \
                 (ord(ch) >= 97 and ord(ch) <= 122) or \
                     (ord(ch) >= 48 and ord(ch) <= 57) or ord(ch) == 95
 
 def is_py_name(token:str):
+
+    ''' Define is the token represents the valid python variable name'''
+
     ret = True
     for indx,ch in enumerate(token):
         if indx == 0:
@@ -284,6 +292,9 @@ def calc_total_sum(dict):
     return sum(dict.values())
 
 def calc_operators(lines:list):
+    ''' Calculates the define operators within the source code'''
+
+    # operators list 
     operands = []
     operands.extend(ARITHMETIC_OPERATORS)
     operands.extend(KEYWORDS)
