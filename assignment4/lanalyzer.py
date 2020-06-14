@@ -43,6 +43,13 @@ def isdoctoken(token):
 
 
 def normalize_docs(tokens:list):
+
+    ''' Normalize the tokens of the particular string to form docs token as join
+        Example: 
+                String: """ This is doc string """; print('hello') 
+                Tokens = ['""', '" This is doc string ", '""', ';' ,'print', '(' ,"'hello'", ')']
+                Normilized string: ['""" This is doc string """', ';' ,'print', '(' ,"'hello'", ')'] '''
+
     empty_str_lit = ['""',"''"]
 
     new_tokens = []
@@ -102,6 +109,31 @@ def normalize_docs(tokens:list):
     return new_tokens
 
 def normalize(lines:list):
+
+    ''' Normalize the physical lines to logical lines if possible, also includes the normilizing of multiple docs comments to one line 
+        Exmaple:
+                E1:  """asd asd asd 
+                        asd asd asd asd 
+                        asdasd asd asd asd 
+                        asd asd asd asd as d
+                        asd asd asd asd asd """
+                Output:  """asd asd asd\nasd asd asd asd\nasdasd asd asd asd\nasd asd asd asd as d\nasd asd asd asd asd """
+                
+                
+                E2: print_reflection(Name = function.__name__, 
+                        Type = str(type(function)),
+                        Sign = str(inspect.signature(function)),
+                        Args = ('positional ' + str(args), 'key=worded ' + str(kwargs)),
+                        Doc = str(function.__doc__),
+                        Source = ''.join(inspect.getsourcelines(function)[0][1:]),
+                        Out = out.getvalue()) 
+                        
+                Output: print_reflection(Name = function.__name__,Type = str(type(function)),Sign = str(inspect.signature(function)),Args = ('positional ' + str(args), 'key=worded ' + str(kwargs)),Doc = str(function.__doc__),Source = ''.join(inspect.getsourcelines(function)[0][1:]),Out = out.getvalue()) 
+                
+                E3:   a = 'asd' + \\
+                        'asd
+                        
+                Output: a = 'asd' + \\'asd '''
     new_lines = []
 
     is_cll = False
@@ -138,6 +170,12 @@ def normalize(lines:list):
     return new_lines
 
 def tokens(line):
+
+    ''' Split the line into tokens
+    
+        Example:
+                String: Source = ''.join(inspect.getsourcelines(function)[0][1:]) 
+                Output: ['Source', '=', "''", '.', 'join', '(', 'inspect', '.', 'getsourcelines', '(', 'function', ')', '[', '0', ']', '[', '1', ':', ']', ')'] '''
 
     tokens = []
     is_delim = False
