@@ -1,0 +1,7 @@
+Q. Give us an intuitive explanation why the formula of estimating program length
+   uses logarithm to base 2 ? Why not something else? Why base two? Why exactly
+   logarithm? What’s the reason? Is that somehow related to how we think?
+
+A. As we operates inside informatics area, the logarithm to base 2 is widely used. The information stores in bits,
+    and computers operates only with 0 and 1, that's why we use logarithm to base 2, we operates in bits context (the metrics of measurement is bit). 
+    The reason of using the logarithm, is that it simplifies the calculations and approximates a various of dependencies. 
