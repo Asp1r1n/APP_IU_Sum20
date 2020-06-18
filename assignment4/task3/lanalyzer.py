@@ -1,59 +1,61 @@
 import fileinput
 
-
 IDENTIFIERS = ['ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789_']
 KEYWORDS = ['if', 'elif', 'else', 'try', 'for', 'with', 'return', 'def', 'import', 'except']
 OPERATORS = ['+', '-', '/', '*', '==', '!=', 'and', 'not', 'or', '=']
 ARITHMETIC_OPERATORS = ['+', '-', '/', '*']
 LOGIC_OPERATORS = ['==', '!=', 'and', 'not', 'or']
-DELIMETERS_S = ['{','}', '(', ')', '[',']', ',', ':', '.', ';', '@']
-DELIMETERS_C = ['//=', '%=','@=', '&=', '|=', '^=', '>>=', '<<=', '**=', '->', '+=', '-=', '*=', '/=']
-SPECIAL_CHARS = ['"',"'", '#', '\\']
-PY_OPS = ['+','-','*','**','/','//','%', '@' ,'<<','>>','&','|','^','~',':=','<','>','<=','>=','==','!=']
-PY_DELIMETERS_S = ['=','{','}', '(', ')', '[',']', ',', ':', '.', ';', '@', '+', '-', '/','*','!','<','%','>','|','&','^']
-PY_DELIMETERS_C = ['//=', '%=','@=', '&=', '|=', '^=', '>>=', '<<=', '**=', '->', '+=', '-=', '*=', '/=']
+DELIMETERS_S = ['{', '}', '(', ')', '[', ']', ',', ':', '.', ';', '@']
+DELIMETERS_C = ['//=', '%=', '@=', '&=', '|=', '^=', '>>=', '<<=', '**=', '->', '+=', '-=', '*=', '/=']
+SPECIAL_CHARS = ['"', "'", '#', '\\']
+PY_OPS = ['+', '-', '*', '**', '/', '//', '%', '@', '<<', '>>', '&', '|', '^', '~', ':=', '<', '>', '<=', '>=', '==',
+          '!=']
+PY_DELIMETERS_S = ['=', '{', '}', '(', ')', '[', ']', ',', ':', '.', ';', '@', '+', '-', '/', '*', '!', '<', '%', '>',
+                   '|', '&', '^']
+PY_DELIMETERS_C = ['//=', '%=', '@=', '&=', '|=', '^=', '>>=', '<<=', '**=', '->', '+=', '-=', '*=', '/=']
 cmm_ch = '#'
-str_chs = ['"',"'"]
+str_chs = ['"', "'"]
 
 
-def list_as_str(l:list, jch = ''):
+def list_as_str(l: list, jch=''):
     """ Conver the list of char to string """
     return jch.join(l)
+
 
 def iscll(line):
     """ Identify is the line is complete logic line"""
 
     return line[-1] not in [',', '\\']
 
-def is_doctoken(token):
 
+def is_doctoken(token):
     """ Identify is the token is doc token"""
 
     ret = -1
 
     if (token.startswith("'''") and token.endswith("'''")) or \
-        (token.startswith('"""') and token.endswith('"""')):
+            (token.startswith('"""') and token.endswith('"""')):
         ret = 1
     elif token.endswith('"""') or token.endswith("'''"):
         ret = 2
     elif token.startswith("'''") or token.startswith('"""'):
         ret = 0
-    
+
     return ret
+
 
 def is_inlinedock(token):
     return token.startswith("#")
 
 
-def normalize_docs(tokens:list):
-
+def normalize_docs(tokens: list):
     ''' Normalize the tokens of the particular string to form docs token as join
         Example: 
                 String: """ This is doc string """; print('hello') 
                 Tokens = ['""', '" This is doc string ", '""', ';' ,'print', '(' ,"'hello'", ')']
                 Normilized string: ['""" This is doc string """', ';' ,'print', '(' ,"'hello'", ')'] '''
 
-    empty_str_lit = ['""',"''"]
+    empty_str_lit = ['""', "''"]
 
     new_tokens = []
 
@@ -65,7 +67,7 @@ def normalize_docs(tokens:list):
     is_doc_token = False
     doc_token = ''
 
-    for indx,token in enumerate(tokens):
+    for indx, token in enumerate(tokens):
         if token in empty_str_lit:
             if not is_empty_str_lit:
                 doc_ch = token[0]
@@ -75,7 +77,7 @@ def normalize_docs(tokens:list):
                 if token[0] == doc_ch:
                     end_indx = indx
                     is_empty_str_lit = False
- 
+
         if start_indx != -1 and not is_doc_token:
             if start_indx == indx - 1:
                 if token.startswith(doc_ch):
@@ -108,12 +110,12 @@ def normalize_docs(tokens:list):
             new_tokens.append(doc_token)
         elif tokens[len(tokens) - 2] in empty_str_lit:
             new_tokens = [' '.join(tokens[0:len(tokens) - 2]) + doc_token]
-        
+
     return new_tokens
 
-def normalize(lines:list):
 
-    ''' Normalize the physical lines to logical lines if possible, also includes the normilizing of multiple docs comments to one line 
+def normalize(lines: list):
+    ''' Normalize the physical lines to logical lines if possible, also includes the normilizing of multiple docs comments to one line
         Exmaple:
                 E1:  """asd asd asd 
                         asd asd asd asd 
@@ -163,18 +165,17 @@ def normalize(lines:list):
                     if doc_str == 2:
                         is_doc = False
 
-
             if is_doc:
                 ln += '\\n'
-            
+
             elif not is_doc:
                 new_lines.append(ln)
                 ln = ''
 
     return new_lines
 
-def tokens(line):
 
+def tokens(line):
     ''' Split the line into tokens
     
         Example:
@@ -188,13 +189,12 @@ def tokens(line):
     is_comment = False
     is_str_lit = False
 
-    str_lit_ch  = ''
+    str_lit_ch = ''
     c_word = []
 
     def add_token():
         tokens.append(list_as_str(c_word))
         c_word.clear()
-
 
     for ch in line:
 
@@ -203,10 +203,10 @@ def tokens(line):
             is_delim = False
             is_comment = False
         elif ch in str_chs:
-            if not is_str_lit: 
+            if not is_str_lit:
                 if c_word != []:
                     add_token()
-                
+
                 str_lit_ch = ch
                 is_str_lit = True
             else:
@@ -216,7 +216,7 @@ def tokens(line):
                     is_str_lit = False
                     continue
         elif ch == cmm_ch:
-            if c_word != []: 
+            if c_word != []:
                 add_token()
             is_comment = True;
         elif ch not in PY_DELIMETERS_S:
@@ -231,7 +231,7 @@ def tokens(line):
                     add_token()
                 is_word = False
             is_delim = True
-        
+
         if is_str_lit:
             c_word.append(ch)
         elif is_comment:
@@ -239,28 +239,28 @@ def tokens(line):
                 continue
             c_word.append(ch)
         elif is_word or is_delim:
-             c_word.append(ch)
-             if is_delim:
-                 if list_as_str(c_word) in DELIMETERS_S:
-                     add_token()
+            c_word.append(ch)
+            if is_delim:
+                if list_as_str(c_word) in DELIMETERS_S:
+                    add_token()
         if ch == ' ' and c_word != []:
             if not is_comment and not is_str_lit:
                 add_token()
-    
+
     if c_word != []:
         add_token()
-        
+
     return tokens
 
 
-def startswith(line_tokens:list, starts:list):
+def startswith(line_tokens: list, starts: list):
     if line_tokens != []: return line_tokens[0] in starts
 
-def is_entity(l_tokens, rec_indx):
 
+def is_entity(l_tokens, rec_indx):
     ''' Define is the tokens form the entity'''
 
-    for indx,token in enumerate(l_tokens):
+    for indx, token in enumerate(l_tokens):
         if token == 'def':
             return True
         if token == 'class':
@@ -270,20 +270,20 @@ def is_entity(l_tokens, rec_indx):
                 if is_py_name(l_tokens[indx - 1]):
                     return True
 
-def is_valid_var_ch(ch):
 
+def is_valid_var_ch(ch):
     ''' Define is the char within the valid variable name'''
 
     return (ord(ch) >= 65 and ord(ch) <= 90) or \
-                (ord(ch) >= 97 and ord(ch) <= 122) or \
-                    (ord(ch) >= 48 and ord(ch) <= 57) or ord(ch) == 95
+           (ord(ch) >= 97 and ord(ch) <= 122) or \
+           (ord(ch) >= 48 and ord(ch) <= 57) or ord(ch) == 95
 
-def is_py_name(token:str):
 
+def is_py_name(token: str):
     ''' Define is the token represents the valid python variable name'''
 
     ret = True
-    for indx,ch in enumerate(token):
+    for indx, ch in enumerate(token):
         if indx == 0:
             if is_valid_var_ch(ch) and ch == ('_'):
                 ret = False
@@ -294,13 +294,16 @@ def is_py_name(token:str):
 
     return ret
 
+
 def calc_total_sum(dict):
     return sum(dict.values())
 
+
 def is_literal(token):
-    return token.isnumeric() \
-    or (token.startswith('"') and token.endswith('"'))\
-    or (token.startswith("'") and token.endswith("'"))\
+    return token.replace('.', '', 1).isdigit() \
+           or (token.startswith('"') and token.endswith('"')) \
+           or (token.startswith("'") and token.endswith("'"))
+
 
 def find_args_end(l_tokens):
     brakets_counter = 1;
@@ -310,7 +313,7 @@ def find_args_end(l_tokens):
         if brakets_counter == 0: return indx
 
 
-def calc_operators(lines:list):
+def calc_operators(lines: list):
     ''' Calculates the define operators within the source code'''
 
     # operators list 
@@ -328,18 +331,16 @@ def calc_operators(lines:list):
     print(operands)
     names = []
 
+    ops_dict = {key: 0 for key in operands}
 
-    ops_dict = {key:0 for key in operands}
-
-
-    def process(l_tokens,indx = 0,o_dict = ops_dict, isArgs = 0):
-        for indx,token in enumerate(l_tokens):
+    def process(l_tokens, indx=0, o_dict=ops_dict, isArgs=0):
+        for indx, token in enumerate(l_tokens):
             if token == '(':
-                if indx != 0 and not is_entity(l_tokens[indx-1:indx], indx):
+                if indx != 0 and not is_entity(l_tokens[indx - 1:indx], indx):
                     tkn = l_tokens[indx - 1]
                     if is_py_name(tkn):
                         ops_dict['calls'] += 1
-                        process(l_tokens[indx + 1: find_args_end(l_tokens[indx + 1:])], indx + 1,ops_dict, isArgs+1)
+                        process(l_tokens[indx + 1: find_args_end(l_tokens[indx + 1:])], indx + 1, ops_dict, isArgs + 1)
                         break;
 
             if is_doctoken(token) != -1:
@@ -352,7 +353,7 @@ def calc_operators(lines:list):
                 ops_dict['literals'] += 1
                 names.append(token)
 
-            if indx!= 0 and is_entity(l_tokens[indx-1:indx], indx):
+            if indx != 0 and is_entity(l_tokens[indx - 1:indx], indx):
                 ops_dict['entities'] += 1
                 names.append(token)
 
@@ -371,17 +372,13 @@ def calc_operators(lines:list):
         process(line_tokens, 0)
 
     return ops_dict, len(set(names))
-    
 
 
 input_file = fileinput.input()
 
 if __name__ == '__main__':
     import printer
+
     n_lines = normalize(input_file)
     ret_dict, n2 = calc_operators(n_lines)
-    printer.print_([n2], operands = ret_dict)
-
-
-
-
+    printer.print_([n2], operands=ret_dict)
