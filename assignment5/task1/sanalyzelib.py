@@ -30,10 +30,17 @@ class Grammar:
            (ord(ch) >= 48 and ord(ch) <= 57) or ord(ch) == 95
 
     @staticmethod
-    def is_literal(token):
-        return token.replace('.', '', 1).isdigit() \
-           or (token.startswith('"') and token.endswith('"')) \
-           or (token.startswith("'") and token.endswith("'"))
+    def isstrliteral(token):
+        return (token.startswith('"') and token.endswith('"')) \
+            or (token.startswith("'") and token.endswith("'"))
+
+    @staticmethod
+    def isnumericliteral(l_tokens):
+        if len(l_tokens) == 1:
+            return l_tokens[0].isdigit()
+
+        elif len(l_tokens) == 3:
+            return l_tokens[0].isdigit() and l_tokens[1] == '.' and l_tokens [2].isdigit()
 
     @staticmethod
     def is_doctoken(token):
@@ -52,7 +59,7 @@ class Grammar:
         return ret
 
     @staticmethod
-    def is_inlinedock(token):
+    def isinlinecomment(token):
         return token.startswith("#")
 
     @staticmethod
@@ -76,7 +83,7 @@ class Grammar:
         ret = True
         for indx, ch in enumerate(token):
             if indx == 0:
-                if Grammar.is_valid_var_ch(ch) and ch == ('_'):
+                if Grammar.is_valid_var_ch(ch) and (ord(ch) < 48 and ord(ch) > 57):
                     ret = False
                     break
             elif not Grammar.is_valid_var_ch(ch):
@@ -403,97 +410,154 @@ class Analyzer:
         operands.extend(Grammar.LOGIC_OPERATORS)
         operands.append('=')
         operands.append('calls')
-        operands.append('docstrings')
-        operands.append('inlinedocs')
-        operands.append('literals')
-        operands.append('entities')
-        operands.append('args')
-        # print(operands)
-        names = []
+        ops_dict = {key:0 for key in operands}
+        opns_dict = {'inlinedocs': 0, 'docstrings': 0, 'literals': 0, 'entities': 0, 'args': 0}
 
-        ops_dict = {key: 0 for key in operands}
+        def process(l_tokens,idx = 0,o_dict = ops_dict,on_dict = opns_dict):
+            print(l_tokens, ' ', idx)
 
-        def process(l_tokens, indx=0, o_dict=ops_dict, isArgs=0):
-            for indx, token in enumerate(l_tokens):
+            args_count = 0
+            offset = 0
+
+            indx = 0
+            while indx < len(l_tokens):
+                offset = indx
+                token = l_tokens[indx]
+
+                if idx != 0:
+                    if token == ',':
+                        args_count += 1
+
+                if token == ')':
+                    if idx != 0:
+                        if len(l_tokens) > 1:
+                            if args_count == 0:
+                                args_count = 1
+                        return offset, args_count
+
+
                 if token == '(':
-                    if indx != 0 and not Grammar.is_entity(l_tokens[indx - 1:indx], indx):
+                    if indx != 0 and not Grammar.is_entity(l_tokens[0:indx], idx):
                         tkn = l_tokens[indx - 1]
-                        if Grammar.is_py_name(tkn):
+                        if Grammar.is_py_name(tkn) and tkn not in Grammar.KEYWORDS  and tkn not in Grammar.SPECIAL_CHARS:
                             ops_dict['calls'] += 1
-                            process(l_tokens[indx + 1: Analyzer.find_args_end(l_tokens[indx + 1:])], indx + 1, ops_dict, isArgs + 1)
-                            break;
+                            offset, args_count = process(l_tokens[indx + 1:],idx + 1)
+                            opns_dict['args'] += args_count
+                            indx += offset + 2
+                            continue
+                
+                if Grammar.is_entity(l_tokens[0:], idx):
+                    print(l_tokens[0:])
+                    opns_dict['entities'] += 1
+                    break
 
                 if Grammar.is_doctoken(token) != -1:
-                    ops_dict['docstrings'] += 1
+                    opns_dict['docstrings'] += 1
 
-                if Grammar.is_inlinedock(token):
-                    ops_dict['inlinedocs'] += 1
+                if Grammar.isinlinecomment(token):
+                    opns_dict['inlinedocs'] += 1
+                            
+                if Grammar.isstrliteral(token):
+                    opns_dict['literals'] += 1
 
-                if Grammar.is_literal(token):
-                    ops_dict['literals'] += 1
-                    names.append(token)
-
-                if indx != 0 and Grammar.is_entity(l_tokens[indx - 1:indx], indx):
-                    ops_dict['entities'] += 1
-                    names.append(token)
-
-                if Grammar.is_py_name(token) and isArgs > 0:
-                    ops_dict['args'] += 1
-                    names.append(token)
-
+                if token.isdigit():
+                    if indx + 2  < len(l_tokens):
+                        if Grammar.isnumericliteral([token, l_tokens[indx + 1], l_tokens[indx + 2]]):
+                            opns_dict['literals'] += 1
+                        else:
+                            opns_dict['literals'] += 1
+                
                 if token in operands[:len(operands)]:
                     ops_dict[token] += 1
 
-            return ops_dict
+                indx += 1
+
+            return offset, args_count
 
         for line in lines:
             line_tokens = Tokenizer.normalize_docs(Tokenizer.tokens(line))
-            print(line_tokens)
-            process(line_tokens, 0)
+            offset, args_count = process(line_tokens, 0)
 
-        return ops_dict, len(set(names))
+        return ops_dict, opns_dict
+
+    # @staticmethod
+    # def print_(*args, **kwargs):
+
+    #     format_str = "{:>11}:   {}"
+    #     sub_str = "{:>10}:    {}"
+
+    #     indx = 1
+    #     for key, value in kwargs.items():
+    #         print('[operators]')
+
+    #         for k, v in list(value.items())[0:-5]:
+    #             print(format_str.format(k, str(v)))
+
+    #         N1 = sum(list(value.values())[0:-5])
+    #         print(sub_str.format('N1', N1))
+    #         print('\n')
+
+    #         print('[operands]')
+    #         for k, v in list(value.items())[-5:]:
+    #             print(format_str.format(k, str(v)))
+
+    #         N2 = sum(list(value.values())[-5:])
+    #         print(sub_str.format('N2', N2))
+
+    #         n1 = 21
+    #         n2 = args[0][0]
+
+    #         Pv = n1+n2
+    #         N = N1+N2
+
+    #         print('\n', '[program]')
+    #         print(format_str.format('vocabulary', Pv))
+    #         print(format_str.format('length', N))
+    #         L = n1 * math.log2(n1) + n2 * math.log2(n2)
+    #         print(format_str.format('calc_length', L))
+    #         V = N * math.log2(Pv)
+    #         print(format_str.format('volume', V))
+    #         D = n1/2 * N2/n2
+    #         print(format_str.format('difficulty', D))
+    #         E = D*V
+    #         print(format_str.format('effort', E))
+
+    @staticmethod
+    def calc_program(ops_dict, opns_dict):
+
+        prog_dict = {key:0 for key in ['vocabulary', 'length', 'calc_length', 'volume', 'difficulty', 'effort']}
+
+        n1 = len(ops_dict.keys()) - 1
+        n2 = len(opns_dict.keys())
+
+        n = n1 + n2
+
+        prog_dict['vocabulary'] = n
+        prog_dict['length'] = sum(ops_dict.values()) + sum(opns_dict.values())
+        prog_dict['calc_length'] =  int(n1 * math.log2(n1) + n2 * math.log2(n2))
+        prog_dict['volume'] = int(prog_dict['length'] * math.log2(n))
+        prog_dict['difficulty'] = int(n1 / 2 * sum(opns_dict.values()) / n2)
+        prog_dict['effort'] = prog_dict['difficulty'] * prog_dict['volume']
+
+        return prog_dict
+
 
     @staticmethod
     def print_(*args, **kwargs):
 
         format_str = "{:>11}:   {}"
-        sub_str = "{:>10}:    {}"
+        sub_str = "{:>11}    {}"
 
         indx = 1
         for key, value in kwargs.items():
-            print('[operators]')
+            print('[' + key + ']')
 
-            for k, v in list(value.items())[0:-5]:
+            for k, v in value.items():
                 print(format_str.format(k, str(v)))
 
-            N1 = sum(list(value.values())[0:-5])
-            print(sub_str.format('N1', N1))
-            print('\n')
-
-            print('[operands]')
-            for k, v in list(value.items())[-5:]:
-                print(format_str.format(k, str(v)))
-
-            N2 = sum(list(value.values())[-5:])
-            print(sub_str.format('N2', N2))
-
-            n1 = 21
-            n2 = args[0][0]
-
-            Pv = n1+n2
-            N = N1+N2
-
-            print('\n', '[program]')
-            print(format_str.format('vocabulary', Pv))
-            print(format_str.format('length', N))
-            L = n1 * math.log2(n1) + n2 * math.log2(n2)
-            print(format_str.format('calc_length', L))
-            V = N * math.log2(Pv)
-            print(format_str.format('volume', V))
-            D = n1/2 * N2/n2
-            print(format_str.format('difficulty', D))
-            E = D*V
-            print(format_str.format('effort', E))
+            if key != 'program':
+                print('\n', format_str.format('N' + str(indx), str(sum(value.values()))))
+            indx += 1
 
 class Decorators:
     
@@ -504,9 +568,12 @@ class Decorators:
         
         def wrapper(*args,**kwargs):
             lines = inspect.getsourcelines(function)[0][1:]
+            print(lines, '\n','\n')
             n_lines = Analyzer.normalize(lines)
-            ret_dict, n2 = Analyzer.calc_operators(n_lines)
-            Analyzer.print_([n2], operands=ret_dict)
+            print(n_lines, '\n','\n')
+            ops_dict, opns_dict  = Analyzer.calc_operators(n_lines)
+            prog_dict = Analyzer.calc_program(ops_dict, opns_dict)
+            Analyzer.print_(operators = ops_dict, operands= opns_dict, program = prog_dict)
 
         return wrapper
 

@@ -15,7 +15,7 @@ def test_complexity():
         ret = True
         for indx, ch in enumerate(token):
             if indx == 0:
-                if is_valid_var_ch(ch) and ch == ('_'):
+                if is_valid_var_ch(ch) and ch == '_':
                     ret = False
                     break
             elif not is_valid_var_ch(ch):

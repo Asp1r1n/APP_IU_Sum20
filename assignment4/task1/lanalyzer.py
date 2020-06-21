@@ -41,6 +41,9 @@ def isdoctoken(token):
     
     return ret
 
+def isinlinecomment(token):
+    return token.startswith('#')
+
 
 def normalize_docs(tokens:list):
 
@@ -237,7 +240,7 @@ def tokens(line):
         elif is_word or is_delim:
              c_word.append(ch)
              if is_delim:
-                 if list_as_str(c_word) in DELIMETERS_S:
+                 if list_as_str(c_word) in DELIMETERS_C:
                      add_token()
         if ch == ' ' and c_word != []:
             if not is_comment and not is_str_lit:
@@ -279,7 +282,7 @@ def is_py_name(token:str):
     ret = True
     for indx,ch in enumerate(token):
         if indx == 0:
-            if is_valid_var_ch(ch) and ch == ('_'):
+            if is_valid_var_ch(ch) and (ord(ch) < 48 and ord(ch) > 57):
                 ret = False
                 break
         elif not is_valid_var_ch(ch):
@@ -290,6 +293,20 @@ def is_py_name(token:str):
 
 def calc_total_sum(dict):
     return sum(dict.values())
+
+
+def isstrliteral(token):
+    return (token.startswith('"') and token.endswith('"')) \
+           or (token.startswith("'") and token.endswith("'"))
+
+
+def isnumericliteral(l_tokens):
+    if len(l_tokens) == 1:
+        return l_tokens[0].isdigit()
+
+    elif len(l_tokens) == 3:
+        return l_tokens[0].isdigit() and l_tokens[1] == '.' and l_tokens [2].isdigit()
+
 
 def calc_operators(lines:list):
     ''' Calculates the define operators within the source code'''
@@ -303,28 +320,74 @@ def calc_operators(lines:list):
     operands.append('calls')
     print(operands)
     ops_dict = {key:0 for key in operands}
+    opns_dict = {'inlinedocs': 0, 'docstrings': 0, 'literals': 0, 'entities': 0, 'args': 0}
+
+    def process(l_tokens,idx = 0,o_dict = ops_dict,on_dict = opns_dict):
+        print(l_tokens, ' ', idx)
+
+        args_count = 0
+        offset = 0
+
+        indx = 0
+        while indx < len(l_tokens):
+            offset = indx
+            token = l_tokens[indx]
+
+            if idx != 0:
+                if token == ',':
+                    args_count += 1
+
+            if token == ')':
+                if idx != 0:
+                    if len(l_tokens) > 1:
+                        if args_count == 0:
+                            args_count = 1
+                    return offset, args_count
 
 
-    def process(l_tokens,indx = 0,o_dict = ops_dict):
-        for indx,token in enumerate(l_tokens):
             if token == '(':
-                if indx != 0 and not is_entity(l_tokens[0:indx], indx):
+                if indx != 0 and not is_entity(l_tokens[0:indx], idx):
                     tkn = l_tokens[indx - 1]
-                    if is_py_name(tkn):
+                    if is_py_name(tkn) and tkn not in KEYWORDS  and tkn not in SPECIAL_CHARS:
                         ops_dict['calls'] += 1
-                        process(l_tokens[indx + 1:],indx + 1)
-                        break;
+                        offset, args_count = process(l_tokens[indx + 1:],idx + 1)
+                        opns_dict['args'] += args_count
+                        indx += offset + 2
+                        continue
+            
+            if is_entity(l_tokens[0:], idx):
+                print(l_tokens[0:])
+                opns_dict['entities'] += 1
+                break
+
+            if isdoctoken(token) != -1:
+                opns_dict['docstrings'] += 1
+
+            if isinlinecomment(token):
+                opns_dict['inlinedocs'] += 1
+                        
+            if isstrliteral(token):
+                opns_dict['literals'] += 1
+
+            if token.isdigit():
+                if indx + 2  < len(l_tokens):
+                    if isnumericliteral([token, l_tokens[indx + 1], l_tokens[indx + 2]]):
+                        opns_dict['literals'] += 1
+                    else:
+                        opns_dict['literals'] += 1
             
             if token in operands[:len(operands)]:
                 ops_dict[token] += 1
 
-        return ops_dict
+            indx += 1
+
+        return offset, args_count
 
     for line in lines:
         line_tokens = normalize_docs(tokens(line))
         process(line_tokens, 0)
 
-    return ops_dict
+    return ops_dict, opns_dict
     
 
 
@@ -334,8 +397,8 @@ if __name__ == '__main__':
     import printer
     n_lines = normalize(input_file)
 
-    ret_dict = calc_operators(n_lines)
-    printer.print_(operands = ret_dict)
+    ret_dict, opns_dict = calc_operators(n_lines)
+    printer.print_(operators = ret_dict, operands = opns_dict)
 
 
 
