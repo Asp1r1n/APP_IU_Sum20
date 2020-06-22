@@ -5,9 +5,9 @@ import numpy as np
 
 
 class PdfPrinter:
-    pdf = FPDF()
 
     def __init__(self):
+        self.pdf = FPDF()
         self.pdf.set_font('Arial', 'B', 12)
 
     def print_dictionaries(self, *dictionaris: dict):

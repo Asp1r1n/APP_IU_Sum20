@@ -303,45 +303,18 @@ class Reflection:
         if not isinstance(function, types.FunctionType):
             raise TypeError
 
-        #def wrapper():
-
-        lines = ''.join(inspect.getsourcelines(function)[0][1:])
-        args = ''
-        kwargs = ''
-
-                
-        if hasattr(function, 'args'):
-            args = getattr(function, args)
-        if hasattr(function, 'kwargs'):
-            kwargs = getattr(function,'kwargs')
-                
-        out = io.StringIO()
-        with redirect_stdout(out):
-            if args != '' and kwargs != '':
-                function(args, kwargs)
-            elif args != '':
-                function(args)
-            elif kwargs != '':
-                function(kwargs)
-            else:
-                function()
-
-                
-        o_dict = {'Name': function.__name__, 'Type': str(type(function)), 'Sign':  str(inspect.signature(function)),
-                            'Args': ('positional ' + str(args), 'key=worded ' + str(kwargs)), 'Doc': str(function.__doc__),
-                            'Source': lines[1:], 'Out': out.getvalue() }
-
         def wrapper():
 
             lines = ''.join(inspect.getsourcelines(function)[0][1:])
             args = ''
             kwargs = ''
 
+                    
             if hasattr(function, 'args'):
                 args = getattr(function, args)
             if hasattr(function, 'kwargs'):
-                kwargs = getattr(function, 'kwargs')
-
+                kwargs = getattr(function,'kwargs')
+                    
             out = io.StringIO()
             with redirect_stdout(out):
                 if args != '' and kwargs != '':
@@ -353,19 +326,18 @@ class Reflection:
                 else:
                     function()
 
-            o_dict = {'Name': function.__name__, 'Type': str(type(function)), 'Sign': str(inspect.signature(function)),
-                      'Args': ('positional ' + str(args), 'key=worded ' + str(kwargs)), 'Doc': str(function.__doc__),
-                      'Source': lines[1:], 'Out': out.getvalue()}
+                    
+            o_dict = {'Name': function.__name__, 'Type': str(type(function)), 'Sign':  str(inspect.signature(function)),
+                                'Args': ('positional ' + str(args), 'key=worded ' + str(kwargs)), 'Doc': str(function.__doc__),
+                                'Source': lines[1:], 'Out': out.getvalue() }
 
-            # Reflection.print_reflection(Name = function.__name__,
-            #                     Type = str(type(function)),
-            #                     Sign = str(inspect.signature(function)),
-            #                     Args = ('positional ' + str(args), 'key=worded ' + str(kwargs)),
-            #                     Doc = str(function.__doc__),
-            #                     Source = lines,
-            #                     Out = out.getvalue())
+            printer = PdfPrinter()
+            printer.print_dictionaries(o_dict)
 
-            print(o_dict)
+            # printer.print_bar_chart("Code metrics", "params", "values", o_dict)
+            printer.save_file(function.__name__ + "_stat.pdf")
+
+            # print(o_dict)
 
         return wrapper
 
@@ -618,8 +590,8 @@ class Decorators:
         printer.print_dictionaries(a_dict)
 
         printer.print_bar_chart("Code metrics", "params", "values", prog_dict)
-        printer.save_file("foo_complexity.pdf")
-        #print(a_dict)
+        printer.save_file(function.__name__ + "_complexity.pdf")
+        # print(a_dict)
 
         return function
 

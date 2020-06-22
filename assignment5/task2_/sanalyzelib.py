@@ -3,7 +3,6 @@ import types
 import io
 import math
 from contextlib import redirect_stdout
-from PdfGenerator import PdfPrinter
 
 class Grammar:
 
@@ -589,10 +588,10 @@ class Decorators:
             # Analyzer.print_(operators = ops_dict, operands= opns_dict, program = prog_dict)
         a_dict = {'operators': ops_dict, 'operands': opns_dict, 'program': prog_dict}
 
-        printer = PdfPrinter()
-        printer.print_dictionaries(a_dict)
-        printer.save_file("change_fonts.pdf")
-        #print(a_dict)
+        # printer = PdfPrinter()
+        # printer.print_dictionaries(a_dict)
+        # printer.save_file("change_fonts.pdf")
+        print(a_dict)
 
         return function
 
