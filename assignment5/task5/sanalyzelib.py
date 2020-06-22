@@ -319,16 +319,19 @@ class Reflection:
                 
                 out = io.StringIO()
 
+                a_dict = ''
+                l = ''
+
                 if is_func:
                     with redirect_stdout(out):
                         if args != '' and kwargs != '':
-                            function(args, kwargs)
+                            a_dict, l = function(args, kwargs)
                         elif args != '':
-                            function(args)
+                            a_dict, l = function(args)
                         elif kwargs != '':
-                            function(kwargs)
+                            a_dict, l = function(kwargs)
                         else:
-                            function()
+                            a_dict, l = function()
 
 
                 o_dict = ''
@@ -352,7 +355,7 @@ class Reflection:
                 #                     Source = lines,
                 #                     Out = out.getvalue())
 
-                print(o_dict)
+                print(o_dict, a_dict)
         return wrapper
 
 class Analyzer:
@@ -594,16 +597,18 @@ class Decorators:
     
     @staticmethod
     def stat_complexity(function):
-        
-        lines = inspect.getsourcelines(function)[0][1:]
-        n_lines = Analyzer.normalize(lines)
-        ops_dict, opns_dict  = Analyzer.calc_operators(n_lines)
-        prog_dict = Analyzer.calc_program(ops_dict, opns_dict)
-            # Analyzer.print_(operators = ops_dict, operands= opns_dict, program = prog_dict)
-        a_dict = {'operators': ops_dict, 'operands': opns_dict, 'program': prog_dict}
-        print(a_dict)
 
-        return function
+        def wrap():
+            
+            lines = inspect.getsourcelines(function)[0][1:]
+            n_lines = Analyzer.normalize(lines)
+            ops_dict, opns_dict  = Analyzer.calc_operators(n_lines)
+            prog_dict = Analyzer.calc_program(ops_dict, opns_dict)
+                # Analyzer.print_(operators = ops_dict, operands= opns_dict, program = prog_dict)
+            a_dict = {'operators': ops_dict, 'operands': opns_dict, 'program': prog_dict}
+            return a_dict, lines
+
+        return wrap
 
 class Stat_object:
     pass
