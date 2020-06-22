@@ -3,6 +3,7 @@ import types
 import io
 import math
 from contextlib import redirect_stdout
+from PdfGenerator import PdfPrinter
 
 class Grammar:
 
@@ -319,19 +320,17 @@ class Reflection:
                 
                 out = io.StringIO()
 
-                a_dict = ''
-                l = ''
 
                 if is_func:
                     with redirect_stdout(out):
                         if args != '' and kwargs != '':
-                            a_dict, l = function(args, kwargs)
+                            function(args, kwargs)
                         elif args != '':
-                            a_dict, l = function(args)
+                            function(args)
                         elif kwargs != '':
-                            a_dict, l = function(kwargs)
+                            function(kwargs)
                         else:
-                            a_dict, l = function()
+                            function()
 
 
                 o_dict = ''
@@ -346,7 +345,9 @@ class Reflection:
                             'Source': lines[1:]}
 
                 
-
+                printer = PdfPrinter()
+                printer.print_dictionaries(o_dict)
+                printer.save_file(function.__name__ + "_stat.pdf")
                 # Reflection.print_reflection(Name = function.__name__, 
                 #                     Type = str(type(function)),
                 #                     Sign = str(inspect.signature(function)),
@@ -355,7 +356,7 @@ class Reflection:
                 #                     Source = lines,
                 #                     Out = out.getvalue())
 
-                print(o_dict, a_dict)
+                print(o_dict)
         return wrapper
 
 class Analyzer:
@@ -512,48 +513,6 @@ class Analyzer:
 
         return ops_dict, opns_dict
 
-    # @staticmethod
-    # def print_(*args, **kwargs):
-
-    #     format_str = "{:>11}:   {}"
-    #     sub_str = "{:>10}:    {}"
-
-    #     indx = 1
-    #     for key, value in kwargs.items():
-    #         print('[operators]')
-
-    #         for k, v in list(value.items())[0:-5]:
-    #             print(format_str.format(k, str(v)))
-
-    #         N1 = sum(list(value.values())[0:-5])
-    #         print(sub_str.format('N1', N1))
-    #         print('\n')
-
-    #         print('[operands]')
-    #         for k, v in list(value.items())[-5:]:
-    #             print(format_str.format(k, str(v)))
-
-    #         N2 = sum(list(value.values())[-5:])
-    #         print(sub_str.format('N2', N2))
-
-    #         n1 = 21
-    #         n2 = args[0][0]
-
-    #         Pv = n1+n2
-    #         N = N1+N2
-
-    #         print('\n', '[program]')
-    #         print(format_str.format('vocabulary', Pv))
-    #         print(format_str.format('length', N))
-    #         L = n1 * math.log2(n1) + n2 * math.log2(n2)
-    #         print(format_str.format('calc_length', L))
-    #         V = N * math.log2(Pv)
-    #         print(format_str.format('volume', V))
-    #         D = n1/2 * N2/n2
-    #         print(format_str.format('difficulty', D))
-    #         E = D*V
-    #         print(format_str.format('effort', E))
-
     @staticmethod
     def calc_program(ops_dict, opns_dict):
 
@@ -597,18 +556,22 @@ class Decorators:
     
     @staticmethod
     def stat_complexity(function):
+        
+        lines = inspect.getsourcelines(function)[0][1:]
+        n_lines = Analyzer.normalize(lines)
+        ops_dict, opns_dict  = Analyzer.calc_operators(n_lines)
+        prog_dict = Analyzer.calc_program(ops_dict, opns_dict)
+            # Analyzer.print_(operators = ops_dict, operands= opns_dict, program = prog_dict)
+        a_dict = {'operators': ops_dict, 'operands': opns_dict, 'program': prog_dict}
 
-        def wrap():
-            
-            lines = inspect.getsourcelines(function)[0][1:]
-            n_lines = Analyzer.normalize(lines)
-            ops_dict, opns_dict  = Analyzer.calc_operators(n_lines)
-            prog_dict = Analyzer.calc_program(ops_dict, opns_dict)
-                # Analyzer.print_(operators = ops_dict, operands= opns_dict, program = prog_dict)
-            a_dict = {'operators': ops_dict, 'operands': opns_dict, 'program': prog_dict}
-            return a_dict, lines
+        printer = PdfPrinter()
+        printer.print_dictionaries(a_dict)
 
-        return wrap
+        printer.print_bar_chart("Code metrics", "params", "values", prog_dict)
+        printer.save_file(function.__name__ + "_complexity.pdf")
+        print(a_dict)
+
+        return function
 
 class Stat_object:
     pass
