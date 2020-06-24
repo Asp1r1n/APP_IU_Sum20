@@ -1,0 +1,48 @@
+1. What is algebraic expression? How does it differs from mathematical formula?
+
+    1.1 Algebraic expression is the expression which consists of constants, variables and algebraic operations
+        Constants(a,b,c) and variables(integers, reals, roots) must be algebraic numbers and not transcendental(PI, complex).
+    
+    1.2 Mathematical formula build up with mathematical expression and can include transcendental numbers,
+        or algebraic expression. However, the mathematical formulas includes assign(=) operation, while algebraic
+        expression does not.
+
+2. What is term rewriting? Is it the same as symbolic computation?
+
+    2.1 Rewriting in computer science and math just replace the word formula, it allows to rewrite the expressions
+        into different expressions in both ways. Example Logic (~~A --> A) (A --> ~~A)
+
+    2.2 Symbolic computation in computer science is the way of manipulation of mathematical expression by computer. Is some
+        sense this is the same as rewriting (we say the machine how mathematical expression can be represented in computer's data,
+        and how to compute them)
+
+3. What is symbolic computation comparing with numerical computation?
+
+    3.1 Numerical computation includes only variables represented by numerical values, and do not include undefined constanst (letters),
+        symbolic computation deals with complexity of numerical computations and constants ones.
+
+4. What is the difference between evaluation and interpretation (in math sense)?
+
+    4.1 Evaluation is the process of computation the expression by the substitution of each variable in it by the application of the
+        mathematical operations. Example (5 + 5): Evaluation (5 + 5 = 10); Example (x + 5, where x is substituted by 5) Evaluation (5 + 5 = 10)
+
+    4.2 Interpretation is the process of giving the meaning to math expression(symbols). Example ( * multiplication sign), we give
+        the interpretation of math expression (a * b), where (* symbol) interpreted as multiplication between (a) and (b). We also, can
+        give the different interpration of (* symbol) and say that in our case the interpration of (a * b) will be the summation
+        between (a) and (b)   
+
+5. What is lazy evaluation comparing with eager evaluation?
+
+    5.1 Lazy evaluation is the process of the expression evaluation in time when the value is needed (right before the access)
+
+    5.2 Eager evaluation is the process of the expression evaluation in time of definition(bounding) (right after the assignment)
+
+6. How functional programming related to algebra systems?
+
+    6.1 There is relation between functional programming and algebara systems, it allows to use different math expressions in different places,
+        without side effect. The evaluation of the expression as well as evaluation of the function will be the same with the same parameters.
+
+7. Is lambda function in Python a replacement for symbolic computation? If yes, why? If not, why not? Provide at least two examples.
+
+    7.1 Lambda function is not replacement of symbolic computation. However, is it very similar. The lambda function works with subsitute value
+        for symbols. Exmaple (add_one = lamda x: x + 1) (print(add_one(6) # returns 7))
