@@ -147,18 +147,11 @@ class OperatorNode:
                 return self
 
         def apply_recursively(l: OperatorNode, r):
-            if isinstance(r, VariableNode):
+            if not isinstance(r, OperatorNode):
                 if isinstance(l.__a, VariableNode):
                     l.__a = operator(a, r)
                     return l
                 if isinstance(l.__b, VariableNode):
-                    l.__b = operator(b, r)
-                    return l
-            if isinstance(r, OperatorNode):
-                if isinstance(l.__a, OperatorNode):
-                    l.__a = operator(a, r)
-                    return l
-                if isinstance(l.__b, OperatorNode):
                     l.__b = operator(b, r)
                     return l
 
@@ -180,3 +173,4 @@ class OperatorNode:
         if isinstance(a, OperatorNode) and isinstance(b, OperatorNode):
             # idk what to do in this case
             1 + 1
+        return self
