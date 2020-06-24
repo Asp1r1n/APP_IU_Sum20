@@ -29,7 +29,7 @@ class VariableNode:
         while i < len(constant):
             i += 1
             variable += c
-        self.__value = float(c)  # assumed that numbers are only in the begining and are valid
+        self.__value = float(value)  # assumed that numbers are only in the begining and are valid
         self.__const = variable
 
     def get_value(self) -> float:
