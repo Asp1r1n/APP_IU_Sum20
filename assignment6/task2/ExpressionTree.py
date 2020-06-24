@@ -111,7 +111,9 @@ def div(l, r):
 class OperatorNode:
     def __init__(self, expression: str, a, b):
         if expression != "+" \
-                and expression != "-":
+                and expression != "-" \
+                and expression != "*" \
+                and expression != "/":
             raise AttributeError()
         self.__expression = expression
         self.__a = a
