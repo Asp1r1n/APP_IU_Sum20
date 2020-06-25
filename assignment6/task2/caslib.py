@@ -94,7 +94,6 @@ class BinaryTree:
         operators = ['*','/','+','-']
         pfix = Parser.parse(expr)
         stack = []
-
         first = True
         for token in pfix:
             # print(token)
@@ -102,8 +101,12 @@ class BinaryTree:
             if token not in operators:
                 node = token
                 if self.__is_float(token):
+                    print(token)
+                    if '/' in token:
+                        node = ExpressionTree.ConstantNode(token)
                     # print(token + ' -variable')
-                    node = ExpressionTree.VariableNode(token)
+                    else:
+                        node = ExpressionTree.VariableNode(token)
                 else:
                     # print(token + ' -constant')
                     node = ExpressionTree.ConstantNode(token)
@@ -137,7 +140,11 @@ class BinaryTree:
 
     def __is_float(self,s:str):
         try:
-            float(s)
+            if '/' in s:
+                x = int(s[:s.find('/')]) / int(s[s.find('/') + 1:])
+                float(x)
+            else:
+                float(s)
             return True
         except ValueError:
             return False
