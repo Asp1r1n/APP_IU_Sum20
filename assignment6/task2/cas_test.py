@@ -3,7 +3,7 @@ from caslib import BinaryTree
 
 
 if __name__ == '__main__':
-    x = BinaryTree('1/7 + 2/7')
+    x = BinaryTree('2 * (x * 3)')
     print(x.evaluate_())
 
 
