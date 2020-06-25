@@ -1,5 +1,8 @@
 import ExpressionTree
 
+# Pasrser class
+# Transform the expression into
+# postfix notation  from infix
 class Parser:
 
     @classmethod
@@ -85,6 +88,8 @@ class Parser:
 
         return pfix
 
+# Binary Expression Tree
+# Form the Tree of Operators and Operands
 class BinaryTree:
 
     def __init__(self,expr:str):
@@ -95,19 +100,20 @@ class BinaryTree:
         pfix = Parser.parse(expr)
         stack = []
         first = True
+        # print(pfix)
         for token in pfix:
             # print(token)
             # print(stack)
             if token not in operators:
                 node = token
                 if self.__is_float(token):
-                    print(token)
                     if '/' in token:
                         node = ExpressionTree.ConstantNode(token)
                     # print(token + ' -variable')
                     else:
                         node = ExpressionTree.VariableNode(token)
                 else:
+                    # print(token + ' s')
                     # print(token + ' -constant')
                     node = ExpressionTree.ConstantNode(token)
 
@@ -126,15 +132,6 @@ class BinaryTree:
             
         return stack.pop()
 
-
-    # def show(self, node):
-    #     if not isinstance(node, ExpressionTree.VariableNode) \
-    #         and not isinstance(node, ExpressionTree.ConstantNode):
-    #             self.show(node.get_b())
-    #             self.show(node.get_a())
-
-    #     print(node)
-
     def evaluate_(self):
         return self.head.evaluate()
 
@@ -152,8 +149,17 @@ class BinaryTree:
 
 
 if __name__ == '__main__':
-    print(" ".join(Parser.parse('((42 * 5 * (5 + z) / -8) * (x^2)) + [0]')))
-    print(" ".join(Parser.tokenize('(5/6) - 1/6')))
-    x = BinaryTree('x + 5x')
+    # print(" ".join(Parser.parse('((42 * 5 * (5 + z) / -8) * (x^2)) + [0]')))
+    # print(" ".join(Parser.parse('(5x + z) + (5z + x)')))
+    # x = BinaryTree('x + 5x')
+    x = BinaryTree('(12 + 3) * (2 + 5)')
+    y = BinaryTree('(x + y) + (x + y)')
+    z = BinaryTree('x + y + x + y')
+    r = BinaryTree('x + 1 + 6x - z + 12 - r')
+    s = BinaryTree('(8 * s) + 1')
     print(x.evaluate_())
+    print(y.evaluate_())
+    print(z.evaluate_())
+    print(r.evaluate_())
+    print(s.evaluate_())
         

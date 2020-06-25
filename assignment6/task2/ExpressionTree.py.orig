@@ -46,8 +46,13 @@ class ConstantNode:
             s.append(str(self.get_value()) + str(self.get_constant()))
         else:
             s.append(str(self.get_constant()))
+<<<<<<< HEAD
         if int(self.get_pow()) > 1:
+            s[-1] = s[-1] + '^' + str(self.__a.get_pow())
+=======
+        if self.get_pow() > 1:
             s[-1] = s[-1] + '^' + str(self.get_pow())
+>>>>>>> 210224a8823ead9b704614dedb6831cedf9ed85d
 
         return ' '.join(s)
 
