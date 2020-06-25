@@ -176,7 +176,7 @@ class OperatorNode:
             #     s.append(str(self.__b.get_constant()))
             # if self.__b.get_pow() > 1:
             #     s[-1] = s[-1] + '^' + str(self.__b.get_pow())
-            s.append(str.self.__b)
+            s.append(str(self.__b))
 
         return ' '.join(s)
 

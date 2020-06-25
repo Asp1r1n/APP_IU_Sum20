@@ -4,19 +4,29 @@ from ExpressionTree import VariableNode
 import sys
 
 execs = {}
+expands = {}
 exec_num = 0
 
+def istoken(s:str):
+
+    for indx, ch in enumerate(s):
+        if indx != 0:
+            if ch in ['*','+','-']:
+                return False
+    return True
+
 def check_execs(expr):
-    splited = expr.split()
+    splited = Parser.tokenize(expr)
     ret = []
     for token in splited:
 
+        if not istoken(token):
+            ret = []
+            break
+
         if token[0] == '[':
             if token in execs.keys():
-                if isinstance(token, BinaryTree):
-                    token = str(execs[token].evaluate_())
-                else:
-                    token = str(execs[token])   
+                token = '(' + str(execs[token]) + ')'
             else:
                 raise ValueError
         
@@ -32,17 +42,28 @@ while True:
         sys.exit()
 
     expression = input_
-    if len(input_.split()) >= 3:
-        input_ = check_execs(input_)
-        expression = BinaryTree(input_)
-        hash_indx = '[' + str(exec_num) + ']'
-        execs[hash_indx] = expression
-        print('[' + str(exec_num) + ']: ' + str(expression.evaluate_()))
-    elif len(input_.split()) >= 1:
-        input_ = check_execs(input_)
-        expression = input_
-        hash_indx = '[' + str(exec_num) + ']'
-        execs[hash_indx] = VariableNode(expression)
-        print('[' + str(exec_num) + ']: ' + str(expression))
+
+
+    try:
+        if len(input_.split()) >= 3:
+            input_ = check_execs(input_)
+            expression = input_
+            hash_indx = '[' + str(exec_num) + ']'
+            expands[hash_indx] = expression
+            execs[hash_indx] = BinaryTree(expression).evaluate_()
+            print('[' + str(exec_num) + ']: ' + str(execs[hash_indx]))
+            exec_num += 1
+        elif len(input_.split()) >= 1:
+            if istoken(input_):
+                input_ = check_execs(input_)
+                expression = input_
+                hash_indx = '[' + str(exec_num) + ']'
+                expands[hash_indx] = expression
+                execs[hash_indx] = expression
+                print('[' + str(exec_num) + ']: ' + str(expression))
+                exec_num += 1
+            else:
+                print('invalid expression')
+    except ValueError:
+        print('invalid expression')
     
-    exec_num += 1
