@@ -176,7 +176,7 @@ class OperatorNode:
             #     s.append(str(self.__b.get_constant()))
             # if self.__b.get_pow() > 1:
             #     s[-1] = s[-1] + '^' + str(self.__b.get_pow())
-            s.append(str.self.__b)
+            s.append(str(self.__b))
 
         return ' '.join(s)
 
@@ -213,11 +213,11 @@ class OperatorNode:
 
         def apply_recursively(l: OperatorNode, r):
             if not isinstance(r, OperatorNode):
-                if isinstance(l.__a, ConstantNode):
-                    l.__a = operator(a, r)
+                if type(l.__a) == type(r):
+                    l.__a = operator(l.__a, r)
                     return l
-                if isinstance(l.__b, ConstantNode):
-                    l.__b = operator(b, r)
+                if type(l.__b) == type(r):
+                    l.__b = operator(l.__b, r)
                     return l
 
             if apply_recursively(l.__a, r) is not None:
