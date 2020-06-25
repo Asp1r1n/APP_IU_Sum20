@@ -146,7 +146,7 @@ class BinaryTree:
 
 if __name__ == '__main__':
     print(" ".join(Parser.parse('((42 * 5 * (5 + z) / -8) * (x^2)) + [0]')))
-    print(" ".join(Parser.parse('A + B * S')))
+    print(" ".join(Parser.tokenize('(5/6) - 1/6')))
     x = BinaryTree('x + 5x')
     print(x.evaluate_())
         
