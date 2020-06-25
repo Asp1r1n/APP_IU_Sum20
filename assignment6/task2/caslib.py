@@ -123,6 +123,15 @@ class BinaryTree:
             
         return stack.pop()
 
+
+    # def show(self, node):
+    #     if not isinstance(node, ExpressionTree.VariableNode) \
+    #         and not isinstance(node, ExpressionTree.ConstantNode):
+    #             self.show(node.get_b())
+    #             self.show(node.get_a())
+
+    #     print(node)
+
     def evaluate_(self):
         return self.head.evaluate()
 
