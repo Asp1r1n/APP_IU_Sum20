@@ -1,5 +1,8 @@
 import ExpressionTree
 
+# Pasrser class
+# Transform the expression into
+# postfix notation  from infix
 class Parser:
 
     @classmethod
@@ -85,6 +88,8 @@ class Parser:
 
         return pfix
 
+# Binary Expression Tree
+# Form the Tree of Operators and Operands
 class BinaryTree:
 
     def __init__(self,expr:str):
@@ -127,15 +132,6 @@ class BinaryTree:
             
         return stack.pop()
 
-
-    # def show(self, node):
-    #     if not isinstance(node, ExpressionTree.VariableNode) \
-    #         and not isinstance(node, ExpressionTree.ConstantNode):
-    #             self.show(node.get_b())
-    #             self.show(node.get_a())
-
-    #     print(node)
-
     def evaluate_(self):
         return self.head.evaluate()
 
@@ -158,6 +154,12 @@ if __name__ == '__main__':
     # x = BinaryTree('x + 5x')
     x = BinaryTree('(12 + 3) * (2 + 5)')
     y = BinaryTree('(x + y) + (x + y)')
+    z = BinaryTree('x + y + x + y')
+    r = BinaryTree('x + 1 + 6x - z + 12 - r')
+    s = BinaryTree('(8 * s) + 1')
     print(x.evaluate_())
     print(y.evaluate_())
+    print(z.evaluate_())
+    print(r.evaluate_())
+    print(s.evaluate_())
         

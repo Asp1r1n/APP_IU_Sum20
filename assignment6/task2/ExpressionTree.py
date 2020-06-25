@@ -7,7 +7,7 @@ class VariableNode:
         return float(self.__value)
 
     def __str__(self):
-        return str(self.__value)
+        return str(self.get_value())
 
 
 class ConstantNode:
@@ -269,5 +269,6 @@ class OperatorNode:
 
         if isinstance(a, OperatorNode) and isinstance(b, OperatorNode):
             # idk what to do in this case
-            print('asdasdasdasd')
+            # print('asdasdasdasd')
+            pass
         return self

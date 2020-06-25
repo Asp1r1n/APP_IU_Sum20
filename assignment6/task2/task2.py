@@ -7,6 +7,7 @@ execs = {}
 expands = {}
 exec_num = 0
 
+#define is the complex token Example: 5/7
 def istoken(s:str):
 
     for indx, ch in enumerate(s):
@@ -15,6 +16,7 @@ def istoken(s:str):
                 return False
     return True
 
+#expand the result of execution back to expression
 def expand(expr):
     ret = []
     for token in expands[expr].split():
@@ -33,6 +35,8 @@ def expand(expr):
     
     return ' '.join(ret)
 
+#validate method
+#check is the expression is correctly formed
 def check_execs(expr):
     splited = Parser.tokenize(expr)
     ret = []
@@ -53,6 +57,7 @@ def check_execs(expr):
     return ' '.join(ret)
 
 
+# Exec loop
 while True:
     input_ = input('>>>  ')
 
