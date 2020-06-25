@@ -95,19 +95,20 @@ class BinaryTree:
         pfix = Parser.parse(expr)
         stack = []
         first = True
+        # print(pfix)
         for token in pfix:
             # print(token)
             # print(stack)
             if token not in operators:
                 node = token
                 if self.__is_float(token):
-                    print(token)
                     if '/' in token:
                         node = ExpressionTree.ConstantNode(token)
                     # print(token + ' -variable')
                     else:
                         node = ExpressionTree.VariableNode(token)
                 else:
+                    # print(token + ' s')
                     # print(token + ' -constant')
                     node = ExpressionTree.ConstantNode(token)
 
@@ -152,8 +153,11 @@ class BinaryTree:
 
 
 if __name__ == '__main__':
-    print(" ".join(Parser.parse('((42 * 5 * (5 + z) / -8) * (x^2)) + [0]')))
-    print(" ".join(Parser.tokenize('(5/6) - 1/6')))
-    x = BinaryTree('x + 5x')
+    # print(" ".join(Parser.parse('((42 * 5 * (5 + z) / -8) * (x^2)) + [0]')))
+    # print(" ".join(Parser.parse('(5x + z) + (5z + x)')))
+    # x = BinaryTree('x + 5x')
+    x = BinaryTree('(12 + 3) * (2 + 5)')
+    y = BinaryTree('(x + y) + (x + y)')
     print(x.evaluate_())
+    print(y.evaluate_())
         

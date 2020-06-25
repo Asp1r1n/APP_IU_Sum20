@@ -269,5 +269,5 @@ class OperatorNode:
 
         if isinstance(a, OperatorNode) and isinstance(b, OperatorNode):
             # idk what to do in this case
-            1 + 1
+            print('asdasdasdasd')
         return self
