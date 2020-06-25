@@ -92,7 +92,7 @@ def add(o, l, r):
             return OperatorNode("+", l, r)
     else:
         if isinstance(r, ConstantNode):
-            if l.get_constant == r.get_constant():
+            if l.get_constant() == r.get_constant():
                 if l.get_pow() == r.get_pow():
                     return ConstantNode(str(l.get_value() + r.get_value()) + str(r.get_constant()) + '^' + str(
                         l.get_pow()))
@@ -129,7 +129,7 @@ def sub(o, l, r):
             return OperatorNode("-", l, r)
     else:
         if isinstance(r, ConstantNode):
-            if l.get_constant == r.get_constant():
+            if l.get_constant() == r.get_constant():
                 if l.get_pow() == r.get_pow():
                     return ConstantNode(str(l.get_value() - r.get_value()) + str(r.get_constant()) + '^' + str(
                         l.get_pow()))
@@ -150,17 +150,17 @@ def mult(o, l, r):
                 r.get_pow()))
     else:
         if isinstance(r, ConstantNode):
-            if l.get_constant == r.get_constant():
+            if l.get_constant() == r.get_constant():
                 if l.get_pow() + r.get_pow() == 0:
                     return VariableNode(multiply(l.__value, r.get_value()))
                 else:
                     return ConstantNode(str(multiply(l.get_value(), r.get_value())) + str(r.get_constant()) + '^' + str(
                         l.get_pow() + r.get_pow()))
             else:
-                return OperatorNode("*", l,r)
+                return OperatorNode("*", l, r)
         else:
             return ConstantNode(str(multiply(l.get_value(), r.get_value())) + str(l.get_constant()) + '^' + str(
-                    l.get_pow()))
+                l.get_pow()))
 
 
 def div(o, l, r):
@@ -205,33 +205,32 @@ class OperatorNode:
     def __str__(self):
         s = []
 
-
-       # if isinstance(self.__a, VariableNode):
-            # s.append(str(self.__a.get_value()))
-         #   s.append(str(self.__a))
-       # elif isinstance(self.__a, ConstantNode):
-            # if self.__a.get_value() != 1:
-            #     s.append(str(self.__a.get_value()) + str(self.__a.get_constant()))
-            # s.append(str(self.__a.get_constant()))
-            # if self.__a.get_pow() > 1:
-            #     s[-1] = s[-1] + '^' + str(self.__a.get_pow())
-         #   s.append(str(self.__a))
-       # elif isinstance(self.__a, OperatorNode):
-          #
+        # if isinstance(self.__a, VariableNode):
+        # s.append(str(self.__a.get_value()))
+        #   s.append(str(self.__a))
+        # elif isinstance(self.__a, ConstantNode):
+        # if self.__a.get_value() != 1:
+        #     s.append(str(self.__a.get_value()) + str(self.__a.get_constant()))
+        # s.append(str(self.__a.get_constant()))
+        # if self.__a.get_pow() > 1:
+        #     s[-1] = s[-1] + '^' + str(self.__a.get_pow())
+        #   s.append(str(self.__a))
+        # elif isinstance(self.__a, OperatorNode):
+        #
         s.append(str(self.__a))
         s.append(str(self.__expression))
         s.append(str(self.__b))
 
-        #if isinstance(self.__b, VariableNode):
-            # s.append(str(self.__b.get_value()))
+        # if isinstance(self.__b, VariableNode):
+        # s.append(str(self.__b.get_value()))
         #    s.append(str(self.__a))
-       # elif isinstance(self.__b, ConstantNode):
-            # if self.__b.get_value() != 1:
-            #     s.append(str(self.__b.get_value()) + str(self.__b.get_constant()))
-            # else:
-            #     s.append(str(self.__b.get_constant()))
-            # if self.__b.get_pow() > 1:
-            #     s[-1] = s[-1] + '^' + str(self.__b.get_pow())
+        # elif isinstance(self.__b, ConstantNode):
+        # if self.__b.get_value() != 1:
+        #     s.append(str(self.__b.get_value()) + str(self.__b.get_constant()))
+        # else:
+        #     s.append(str(self.__b.get_constant()))
+        # if self.__b.get_pow() > 1:
+        #     s[-1] = s[-1] + '^' + str(self.__b.get_pow())
         #    s.append(str(self.__b))
 
         return ' '.join(s)
@@ -245,57 +244,51 @@ class OperatorNode:
             self.__b = self.__b.evaluate()
         return self.__execute_operator(self.__a, self.__b, self.__get_operator())
 
-    def __get_operator(self):
-        if self.__expression == "+":
+    def __get_operator(self, oper = ""):
+        if(oper == ""):
+            oper = self.__expression
+        if oper == "+":
             return lambda o, x, y: add(o, x, y)
-        if self.__expression == "-":
+        if oper == "-":
             return lambda o, x, y: sub(o, x, y)
-        if self.__expression == "*":
+        if oper == "*":
             return lambda o, x, y: mult(o, x, y)
-        if self.__expression == "/":
+        if oper == "/":
             return lambda o, x, y: div(o, x, y)
 
     def __execute_operator(self, a, b, operator):
-        if  not isinstance(a, OperatorNode) and  not isinstance(b, OperatorNode):
+        if not isinstance(a, OperatorNode) and not isinstance(b, OperatorNode):
             return operator(self, a, b)
 
-        def apply_recursively(l: OperatorNode, r):
+        def apply_recursively(l: OperatorNode, r, __expression = self.__expression):
+            oper = self.__get_operator(__expression)
             if not isinstance(r, OperatorNode):
-                if(self.__expression == "+" or \
-                        self.__expression == "-")\
+                if (__expression == "+" or __expression == "-") \
                         and \
-                    (l.__expression == "+" or \
-                     l.__expression == "-"):
+                        (l.__expression == "+" or l.__expression == "-"):
                     if type(l.__a) == type(r):
-                            l.__a = operator(l, l.__a, r)
-                            return l
-                    if type(l.__b) == type(r):
-                            l.__b = operator(l, l.__b, r)
-                            return l
-                elif(self.__expression == "+" or \
-                        self.__expression == "-")\
-                        and \
-                    (l.__expression == "*" or \
-                     l.__expression == "/"):
-                    return None
-                elif (self.__expression == "*" or \
-                      self.__expression == "/") \
-                        and \
-                        (l.__expression == "*" or \
-                         l.__expression == "/"):
-                    if type(l.__a) == type(r):
-                        l.__a = operator(l, l.__a, r)
+                        l.__a = oper(l, l.__a, r)
                         return l
                     if type(l.__b) == type(r):
-                        l.__b = operator(l, l.__b, r)
+                        l.__b = oper(l, l.__b, r)
+                        return l
+                elif (__expression == "+" or __expression == "-") \
+                        and \
+                        (l.__expression == "*" or l.__expression == "/"):
+                    return None
+                elif (__expression == "*" or __expression == "/") \
+                        and \
+                        (l.__expression == "*" or l.__expression == "/"):
+                    if type(l.__a) == type(r):
+                        l.__a = oper(l, l.__a, r)
+                        return l
+                    if type(l.__b) == type(r):
+                        l.__b = oper(l, l.__b, r)
                         return l
                 else:
-
-                    l.__a = operator(l, l.__a, r)
-                    l.__b = operator(l, l.__b, r)
+                    l.__a = oper(l, l.__a, r)
+                    l.__b = oper(l, l.__b, r)
                     return l
-
-
 
             if isinstance(l.__a, OperatorNode) and apply_recursively(l.__a, r) is not None:
                 return l
@@ -314,6 +307,41 @@ class OperatorNode:
 
         if isinstance(a, OperatorNode) and isinstance(b, OperatorNode):
             # idk what to do in this case
-            # print('asdasdasdasd')
+            if(self.__expression == "*" and b.__expression == "+"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "*" and b.__expression == "-"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b, "/")
+            if (self.__expression == "*" and b.__expression == "*"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "*" and b.__expression == "/"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b, "/")
+
+            if (self.__expression == "/" and b.__expression == "+"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "/" and b.__expression == "-"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b, "*")
+            if (self.__expression == "/" and b.__expression == "*"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "/" and b.__expression == "/"):
+                apply_recursively(apply_recursively(a, b.__a), b.__b, "*")
+
+            if (self.__expression == "+" and b.__expression == "+"):
+                return apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "+" and b.__expression == "-"):
+                return apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "+" and b.__expression == "*"):
+                return self
+            if (self.__expression == "+" and b.__expression == "/"):
+                return self
+
+            if (self.__expression == "-" and b.__expression == "+"):
+                return apply_recursively(apply_recursively(a, b.__a), b.__b)
+            if (self.__expression == "-" and b.__expression == "-"):
+                return apply_recursively(apply_recursively(a, b.__a), b.__b, "+")
+            if (self.__expression == "-" and b.__expression == "*"):
+                return self
+            if (self.__expression == "-" and b.__expression == "/"):
+                return self
+
             pass
         return self
