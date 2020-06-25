@@ -35,8 +35,8 @@ class ConstantNode:
             variable += c
 
         # print('val' + ' ' + value)
-        if value == '': value = '1' 
-        self.__value = float(value) # assumed that numbers are only in the begining and are valid
+        if value == '': value = '1'
+        self.__value = float(value)  # assumed that numbers are only in the begining and are valid
         self.__const = variable
 
     def __str__(self):
@@ -93,21 +93,24 @@ def add(o, l, r):
         #                            r.get_constant())
         return ConstantNode(str(l.get_value() + r.get_value()) + str(r.get_constant()))
 
+
 def sub(o, l, r):
-    if l.get_value() < r.get_value():
-        if o._OperatorNode__expression == "+":
-            o._OperatorNode__expression = "-"
-            if isinstance(r, VariableNode):
-                return VariableNode(r.get_value() - l.get_value())
-            if isinstance(r, ConstantNode):
-                return ConstantNode(str(r.get_value() - l.get_value()) + str(r.get_constant()))
-        else:
-            if o._OperatorNode__expression == "-":
-                o._OperatorNode__expression = "+"
-                if isinstance(r, VariableNode):
-                    return VariableNode(r.get_value() - l.get_value())
-                if isinstance(r, ConstantNode):
-                    return ConstantNode(str(r.get_value() - l.get_value()) + str(r.get_constant()))
+    # if l.get_value() < r.get_value():
+    #     if o._OperatorNode__expression == "+":
+    #         o._OperatorNode__expression = "-"
+    #         o.__expression = "-"
+    #         if isinstance(r, VariableNode):
+    #             return VariableNode(r.get_value() - l.get_value())
+    #         if isinstance(r, ConstantNode):
+    #             return ConstantNode(str(r.get_value() - l.get_value()) + str(r.get_constant()))
+    #     else:
+    #         if o._OperatorNode__expression == "-":
+    #             o._OperatorNode__expression = "+"
+    #             o.__expression = "+"
+    #             if isinstance(r, VariableNode):
+    #                 return VariableNode(r.get_value() - l.get_value())
+    #             if isinstance(r, ConstantNode):
+    #                 return ConstantNode(str(r.get_value() - l.get_value()) + str(r.get_constant()))
 
     if isinstance(r, VariableNode):
         return VariableNode(l.get_value() - r.get_value())
@@ -116,8 +119,6 @@ def sub(o, l, r):
         # return ConstantNode.create(ConstantNode(""),
         #                           l.get_value() - r.get_value(),
         #                           r.get_constant())
-
-
 
 
 def mult(o, l, r):
@@ -131,12 +132,13 @@ def mult(o, l, r):
             #                            multiply(l.__value, r.get_value()),
             #                            r.get_constant(),
             #                            l.get_pow() + r.get_pow())
-            return ConstantNode(str(multiply(l.get_value(), r.get_value())) + str(r.get_constant()) + '^' + str(l.get_pow() + r.get_pow()))
+            return ConstantNode(str(multiply(l.get_value(), r.get_value())) + str(r.get_constant()) + '^' + str(
+                l.get_pow() + r.get_pow()))
 
 
 def div(o, l, r):
     if isinstance(r, VariableNode):
-        return VariableNode(multiply(l.get_value(), r.get_value()))
+        return VariableNode(divide(l.get_value(), r.get_value()))
     if isinstance(r, ConstantNode):
         if l.get_pow() == r.get_pow():
             return VariableNode(divide(l.__value, r.get_value()))
@@ -145,7 +147,8 @@ def div(o, l, r):
             #                            divide(l.__value, r.get_value()),
             #                            r.get_constant(),
             #                            l.get_pow() - r.get_pow())
-            return ConstantNode(str(divide(l.get_value(), r.get_value())) + str(r.get_constant()) + '^' + str(l.get_pow() - r.get_pow()))
+            return ConstantNode(str(divide(l.get_value(), r.get_value())) + str(r.get_constant()) + '^' + str(
+                l.get_pow() - r.get_pow()))
 
 
 class OperatorNode:
@@ -168,31 +171,34 @@ class OperatorNode:
     def __str__(self):
         s = []
 
-        if isinstance(self.__a, VariableNode):
+
+       # if isinstance(self.__a, VariableNode):
             # s.append(str(self.__a.get_value()))
-            s.append(str(self.__a))
-        elif isinstance(self.__a, ConstantNode):
+         #   s.append(str(self.__a))
+       # elif isinstance(self.__a, ConstantNode):
             # if self.__a.get_value() != 1:
             #     s.append(str(self.__a.get_value()) + str(self.__a.get_constant()))
             # s.append(str(self.__a.get_constant()))
             # if self.__a.get_pow() > 1:
             #     s[-1] = s[-1] + '^' + str(self.__a.get_pow())
-            s.append(str(self.__b))
-
+         #   s.append(str(self.__a))
+       # elif isinstance(self.__a, OperatorNode):
+          #
+        s.append(str(self.__a))
         s.append(str(self.__expression))
+        s.append(str(self.__b))
 
-
-        if isinstance(self.__b, VariableNode):
+        #if isinstance(self.__b, VariableNode):
             # s.append(str(self.__b.get_value()))
-            s.append(str(self.__a))
-        elif isinstance(self.__b, ConstantNode):
+        #    s.append(str(self.__a))
+       # elif isinstance(self.__b, ConstantNode):
             # if self.__b.get_value() != 1:
             #     s.append(str(self.__b.get_value()) + str(self.__b.get_constant()))
             # else:
             #     s.append(str(self.__b.get_constant()))
             # if self.__b.get_pow() > 1:
             #     s[-1] = s[-1] + '^' + str(self.__b.get_pow())
-            s.append(str(self.__b))
+        #    s.append(str(self.__b))
 
         return ' '.join(s)
 
@@ -230,15 +236,25 @@ class OperatorNode:
         def apply_recursively(l: OperatorNode, r):
             if not isinstance(r, OperatorNode):
                 if type(l.__a) == type(r):
-                    l.__a = operator(l, l.__a, r)
-                    return l
+                    if isinstance(l.__a, ConstantNode):
+                        if l.__a.get_constant() == r.get_constant():
+                            l.__a = operator(l, l.__a, r)
+                            return l
+                    else:
+                        l.__a = operator(l, l.__a, r)
+                        return l
                 if type(l.__b) == type(r):
-                    l.__b = operator(l, l.__b, r)
-                    return l
+                    if isinstance(l.__b, ConstantNode):
+                        if l.__b.get_constant() == r.get_constant():
+                            l.__b = operator(l, l.__b, r)
+                            return l
+                    else:
+                        l.__b = operator(l, l.__b, r)
+                        return l
 
-            if apply_recursively(l.__a, r) is not None:
+            if isinstance(l.__a, OperatorNode) and apply_recursively(l.__a, r) is not None:
                 return l
-            if apply_recursively(l.__b, r) is not None:
+            if isinstance(l.__b, OperatorNode) and apply_recursively(l.__b, r) is not None:
                 return l
             return None
 
