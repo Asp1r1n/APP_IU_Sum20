@@ -15,6 +15,24 @@ def istoken(s:str):
                 return False
     return True
 
+def expand(expr):
+    ret = []
+    for token in expands[expr].split():
+
+        if not istoken(token):
+            ret = []
+            break
+
+        if token[0] == '[':
+            if token in execs.keys():
+                token = '(' + str(expands[token]) + ')'
+            else:
+                raise ValueError
+        
+        ret.append(token)
+    
+    return ' '.join(ret)
+
 def check_execs(expr):
     splited = Parser.tokenize(expr)
     ret = []
@@ -43,9 +61,18 @@ while True:
 
     expression = input_
 
+    
+
 
     try:
-        if len(input_.split()) >= 3:
+        expression = input_.split()
+        if expression[0] == 'expand':
+            if expression[1][0] != '[':
+                raise ValueError
+            
+            print('[~]: ' + expand(expression[1]))
+
+        elif len(input_.split()) >= 3:
             input_ = check_execs(input_)
             expression = input_
             hash_indx = '[' + str(exec_num) + ']'
