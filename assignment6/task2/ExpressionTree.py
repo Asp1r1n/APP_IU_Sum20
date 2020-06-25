@@ -22,7 +22,7 @@ class ConstantNode:
         i = 0;
         self.__power = 1
         if len(constant.split("^")) > 1:
-            self.__power = constant.split("^")[1]
+            self.__power = int(constant.split("^")[1])
         constant = constant.split("^")[0]
         for c in constant:
             if c.isnumeric() or c == "." or c == "-":
@@ -47,7 +47,7 @@ class ConstantNode:
         else:
             s.append(str(self.get_constant()))
         if self.get_pow() > 1:
-            s[-1] = s[-1] + '^' + str(self.__a.get_pow())
+            s[-1] = s[-1] + '^' + str(self.get_pow())
 
         return ' '.join(s)
 
